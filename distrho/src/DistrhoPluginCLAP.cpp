@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2023 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2024 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -29,7 +29,7 @@
 # error DISTRHO_PLUGIN_CLAP_ID undefined!
 #endif
 
-#if DISTRHO_PLUGIN_HAS_UI && ! defined(HAVE_DGL) && ! DISTRHO_PLUGIN_HAS_EXTERNAL_UI
+#if DISTRHO_PLUGIN_HAS_UI && ! defined(HAVE_DGL)
 # undef DISTRHO_PLUGIN_HAS_UI
 # define DISTRHO_PLUGIN_HAS_UI 0
 #endif
@@ -57,7 +57,7 @@
 #include "clap/ext/thread-check.h"
 #include "clap/ext/timer-support.h"
 
-#if (defined(DISTRHO_OS_MAC) || defined(DISTRHO_OS_WINDOWS)) && ! DISTRHO_PLUGIN_HAS_EXTERNAL_UI
+#if defined(DISTRHO_OS_MAC) || defined(DISTRHO_OS_WINDOWS)
 # define DPF_CLAP_USING_HOST_TIMER 0
 #else
 # define DPF_CLAP_USING_HOST_TIMER 1
@@ -171,12 +171,9 @@ struct ClapEventQueue
 
     ClapEventQueue()
        #if DISTRHO_PLUGIN_HAS_UI && DISTRHO_PLUGIN_WANT_MIDI_INPUT
-        : fNotesBuffer(StackBuffer_INIT)
+        : fNotesBuffer(CPP_AGGREGATE_INIT(SmallStackBuffer){0, 0, 0, false, {0}})
        #endif
     {
-       #if DISTRHO_PLUGIN_HAS_UI && DISTRHO_PLUGIN_WANT_MIDI_INPUT && ! defined(DISTRHO_PROPER_CPP11_SUPPORT)
-        std::memset(&fNotesBuffer, 0, sizeof(fNotesBuffer));
-       #endif
        #if DISTRHO_PLUGIN_WANT_PROGRAMS
         fCurrentProgram = 0;
        #endif
@@ -211,7 +208,9 @@ public:
           #endif
            const bool isFloating)
         : fPlugin(plugin),
+         #if DISTRHO_PLUGIN_WANT_STATE
           fPluginEventQueue(eventQueue),
+         #endif
           fEventQueue(eventQueue->fEventQueue),
           fCachedParameters(eventQueue->fCachedParameters),
          #if DISTRHO_PLUGIN_WANT_PROGRAMS
@@ -280,10 +279,10 @@ public:
 
         double scaleFactor = fScaleFactor;
        #if defined(DISTRHO_UI_DEFAULT_WIDTH) && defined(DISTRHO_UI_DEFAULT_HEIGHT)
-        *width = DISTRHO_UI_DEFAULT_WIDTH;
-        *height = DISTRHO_UI_DEFAULT_HEIGHT;
         if (d_isZero(scaleFactor))
             scaleFactor = 1.0;
+        *width = DISTRHO_UI_DEFAULT_WIDTH * scaleFactor;
+        *height = DISTRHO_UI_DEFAULT_HEIGHT * scaleFactor;
        #else
         UIExporter tmpUI(nullptr, 0, fPlugin.getSampleRate(),
                          nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, d_nextBundlePath,
@@ -371,10 +370,10 @@ public:
                 {
                     // fix width
                     if (reqRatio > ratio)
-                        *width = static_cast<int32_t>(*height * ratio + 0.5);
+                        *width = d_roundToIntPositive(*height * ratio);
                     // fix height
                     else
-                        *height = static_cast<int32_t>(static_cast<double>(*width) / ratio + 0.5);
+                        *height = d_roundToIntPositive(static_cast<double>(*width) / ratio);
                 }
             }
 
@@ -534,7 +533,9 @@ public:
 private:
     // Plugin and UI
     PluginExporter& fPlugin;
+   #if DISTRHO_PLUGIN_WANT_STATE
     ClapEventQueue* const fPluginEventQueue;
+   #endif
     ClapEventQueue::Queue& fEventQueue;
     ClapEventQueue::CachedParameters& fCachedParameters;
    #if DISTRHO_PLUGIN_WANT_PROGRAMS
@@ -600,8 +601,8 @@ private:
         // Set state
         for (StringMap::const_iterator cit=fStateMap.begin(), cite=fStateMap.end(); cit != cite; ++cit)
         {
-            const String& key   = cit->first;
-            const String& value = cit->second;
+            const String& key(cit->first);
+            const String& value(cit->second);
 
             // TODO skip DSP only states
 
@@ -957,13 +958,13 @@ public:
                     case CLAP_EVENT_NOTE_ON:
                        #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
                         // BUG: even though we only report CLAP_NOTE_DIALECT_MIDI as supported, Bitwig sends us this anyway
-                        addNoteEvent(static_cast<const clap_event_note_t*>(static_cast<const void*>(event)), true);
+                        addNoteEvent(reinterpret_cast<const clap_event_note_t*>(event), true);
                        #endif
                         break;
                     case CLAP_EVENT_NOTE_OFF:
                        #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
                         // BUG: even though we only report CLAP_NOTE_DIALECT_MIDI as supported, Bitwig sends us this anyway
-                        addNoteEvent(static_cast<const clap_event_note_t*>(static_cast<const void*>(event)), false);
+                        addNoteEvent(reinterpret_cast<const clap_event_note_t*>(event), false);
                        #endif
                         break;
                     case CLAP_EVENT_NOTE_CHOKE:
@@ -971,9 +972,10 @@ public:
                     case CLAP_EVENT_NOTE_EXPRESSION:
                         break;
                     case CLAP_EVENT_PARAM_VALUE:
-                        DISTRHO_SAFE_ASSERT_UINT2_BREAK(event->size == sizeof(clap_event_param_value),
-                                                        event->size, sizeof(clap_event_param_value));
-                        setParameterValueFromEvent(static_cast<const clap_event_param_value*>(static_cast<const void*>(event)));
+                        DISTRHO_SAFE_ASSERT_UINT2_BREAK(event->size == sizeof(clap_event_param_value_t),
+                                                        event->size, sizeof(clap_event_param_value_t));
+                        if (event->space_id == 0)
+                            setParameterValueFromEvent(reinterpret_cast<const clap_event_param_value_t*>(event));
                         break;
                     case CLAP_EVENT_PARAM_MOD:
                     case CLAP_EVENT_PARAM_GESTURE_BEGIN:
@@ -984,7 +986,7 @@ public:
                         DISTRHO_SAFE_ASSERT_UINT2_BREAK(event->size == sizeof(clap_event_midi_t),
                                                         event->size, sizeof(clap_event_midi_t));
                        #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
-                        addMidiEvent(static_cast<const clap_event_midi_t*>(static_cast<const void*>(event)));
+                        addMidiEvent(reinterpret_cast<const clap_event_midi_t*>(event));
                        #endif
                         break;
                     case CLAP_EVENT_MIDI_SYSEX:
@@ -1232,11 +1234,13 @@ public:
 
                 if (event->type != CLAP_EVENT_PARAM_VALUE)
                     continue;
+                if (event->space_id != 0)
+                    continue;
 
-                DISTRHO_SAFE_ASSERT_UINT2_BREAK(event->size == sizeof(clap_event_param_value),
-                                                event->size, sizeof(clap_event_param_value));
+                DISTRHO_SAFE_ASSERT_UINT2_BREAK(event->size == sizeof(clap_event_param_value_t),
+                                                event->size, sizeof(clap_event_param_value_t));
 
-                setParameterValueFromEvent(static_cast<const clap_event_param_value*>(static_cast<const void*>(event)));
+                setParameterValueFromEvent(reinterpret_cast<const clap_event_param_value_t*>(event));
             }
         }
 
@@ -1305,7 +1309,7 @@ public:
     }
    #endif
 
-    void setParameterValueFromEvent(const clap_event_param_value* const event)
+    void setParameterValueFromEvent(const clap_event_param_value_t* const event)
     {
         fCachedParameters.values[event->param_id] = event->value;
         fCachedParameters.changed[event->param_id] = true;
@@ -1372,6 +1376,9 @@ public:
 
         fLastKnownLatency = latency;
 
+        if (fHostExtensions.latency == nullptr)
+            return;
+
         if (isActive)
         {
             fLatencyChanged = true;
@@ -1427,7 +1434,7 @@ public:
         // Update current state
         for (StringMap::const_iterator cit=fStateMap.begin(), cite=fStateMap.end(); cit != cite; ++cit)
         {
-            const String& key = cit->first;
+            const String& key(cit->first);
             fStateMap[key] = fPlugin.getStateValue(key);
         }
        #endif
@@ -1451,8 +1458,8 @@ public:
 
             for (StringMap::const_iterator cit=fStateMap.begin(), cite=fStateMap.end(); cit != cite; ++cit)
             {
-                const String& key   = cit->first;
-                const String& value = cit->second;
+                const String& key(cit->first);
+                const String& value(cit->second);
 
                 // join key and value
                 String tmpStr;
@@ -1504,7 +1511,7 @@ public:
 
         for (int32_t wrtntotal = 0, wrtn; wrtntotal < size; wrtntotal += wrtn)
         {
-            wrtn = stream->write(stream, buffer, size - wrtntotal);
+            wrtn = stream->write(stream, buffer + wrtntotal, size - wrtntotal);
             DISTRHO_SAFE_ASSERT_INT_RETURN(wrtn > 0, wrtn, false);
         }
 
@@ -1517,6 +1524,7 @@ public:
         ClapUI* const ui = fUI.get();
        #endif
         String key, value;
+        bool empty = true;
         bool hasValue = false;
         bool fillingKey = true; // if filling key or value
         char queryingType = 'i'; // can be 'n', 's' or 'p' (none, states, parameters)
@@ -1524,14 +1532,15 @@ public:
         char buffer[512], orig;
         buffer[sizeof(buffer)-1] = '\xff';
 
-        for (int32_t terminated = 0, read; terminated == 0;)
+        for (int32_t terminated = 0; terminated == 0;)
         {
-            read = stream->read(stream, buffer, sizeof(buffer)-1);
+            const int32_t read = stream->read(stream, buffer, sizeof(buffer)-1);
             DISTRHO_SAFE_ASSERT_INT_RETURN(read >= 0, read, false);
 
             if (read == 0)
-                return true;
+                return !empty;
 
+            empty = false;
             for (int32_t i = 0; i < read; ++i)
             {
                 // found terminator, stop here
@@ -1665,9 +1674,14 @@ public:
                                 continue;
 
                             if (fPlugin.getParameterHints(j) & kParameterIsInteger)
+                            {
                                 fvalue = std::atoi(value.buffer());
+                            }
                             else
+                            {
+                                const ScopedSafeLocale ssl;
                                 fvalue = std::atof(value.buffer());
+                            }
 
                             fCachedParameters.values[j] = fvalue;
                            #if DISTRHO_PLUGIN_HAS_UI
@@ -1751,23 +1765,11 @@ public:
     {
         fPlugin.setState(key, value);
 
-        // check if we want to save this key
-        if (! fPlugin.wantStateKey(key))
-            return;
-
-        // check if key already exists
-        for (StringMap::iterator it=fStateMap.begin(), ite=fStateMap.end(); it != ite; ++it)
+        if (fPlugin.wantStateKey(key))
         {
-            const String& dkey(it->first);
-
-            if (dkey == key)
-            {
-                it->second = value;
-                return;
-            }
+            const String dkey(key);
+            fStateMap[dkey] = value;
         }
-
-        d_stderr("Failed to find plugin state with key \"%s\"", key);
     }
    #endif
 
@@ -2502,6 +2504,8 @@ static const clap_plugin_descriptor_t* CLAP_ABI clap_get_plugin_descriptor(const
         DISTRHO_PLUGIN_CLAP_FEATURES,
        #elif DISTRHO_PLUGIN_IS_SYNTH
         "instrument",
+       #else
+        "audio-effect",
        #endif
         nullptr
     };
@@ -2528,8 +2532,11 @@ static const clap_plugin_descriptor_t* CLAP_ABI clap_get_plugin_descriptor(const
 
 static const clap_plugin_t* CLAP_ABI clap_create_plugin(const clap_plugin_factory_t* const factory,
                                                         const clap_host_t* const host,
-                                                        const char*)
+                                                        const char* const plugin_id)
 {
+    if (plugin_id == nullptr || std::strcmp(plugin_id, DISTRHO_PLUGIN_CLAP_ID) != 0)
+        return nullptr;
+
     clap_plugin_t* const pluginptr = static_cast<clap_plugin_t*>(std::malloc(sizeof(clap_plugin_t)));
     DISTRHO_SAFE_ASSERT_RETURN(pluginptr != nullptr, nullptr);
 

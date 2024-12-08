@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2021 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2024 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -119,14 +119,6 @@ struct HugeStackBuffer {
     uint8_t  buf[size];
 };
 
-#ifdef DISTRHO_PROPER_CPP11_SUPPORT
-# define HeapBuffer_INIT  {0, 0, 0, 0, false, nullptr}
-# define StackBuffer_INIT {0, 0, 0, false, {0}}
-#else
-# define HeapBuffer_INIT
-# define StackBuffer_INIT
-#endif
-
 // -----------------------------------------------------------------------
 // RingBufferControl templated class
 
@@ -201,13 +193,21 @@ public:
     }
 
     /*
+     * Get the full ringbuffer size.
+     */
+    uint32_t getSize() const noexcept
+    {
+        return buffer != nullptr ? buffer->size : 0;
+    }
+
+    /*
      * Get the size of the data available to read.
      */
     uint32_t getReadableDataSize() const noexcept
     {
         DISTRHO_SAFE_ASSERT_RETURN(buffer != nullptr, 0);
 
-        const uint32_t wrap = buffer->head > buffer->tail ? 0 : buffer->size;
+        const uint32_t wrap = buffer->head >= buffer->tail ? 0 : buffer->size;
 
         return wrap + buffer->head - buffer->tail;
     }
@@ -219,9 +219,9 @@ public:
     {
         DISTRHO_SAFE_ASSERT_RETURN(buffer != nullptr, 0);
 
-        const uint32_t wrap = (buffer->tail > buffer->wrtn) ? 0 : buffer->size;
+        const uint32_t wrap = buffer->tail > buffer->wrtn ? 0 : buffer->size;
 
-        return wrap + buffer->tail - buffer->wrtn;
+        return wrap + buffer->tail - buffer->wrtn - 1;
     }
 
     // -------------------------------------------------------------------
@@ -241,6 +241,20 @@ public:
         buffer->invalidateCommit = false;
 
         std::memset(buffer->buf, 0, buffer->size);
+    }
+
+    /*
+     * Reset the ring buffer read and write positions, marking the buffer as empty.
+     * Requires a buffer struct tied to this class.
+     */
+    void flush() noexcept
+    {
+        DISTRHO_SAFE_ASSERT_RETURN(buffer != nullptr,);
+
+        buffer->head = buffer->tail = buffer->wrtn = 0;
+        buffer->invalidateCommit = false;
+
+        errorWriting = false;
     }
 
     // -------------------------------------------------------------------
@@ -376,6 +390,36 @@ public:
     bool readCustomType(T& type) noexcept
     {
         if (tryRead(&type, sizeof(T)))
+            return true;
+
+        std::memset(&type, 0, sizeof(T));
+        return false;
+    }
+
+    // -------------------------------------------------------------------
+    // peek operations (returns a value without advancing read position)
+
+    /*
+     * Peek for an unsigned 32-bit integer.
+     * Returns 0 if reading fails.
+     */
+    uint32_t peekUInt() const noexcept
+    {
+        uint32_t ui = 0;
+        return tryPeek(&ui, sizeof(int32_t)) ? ui : 0;
+    }
+
+    /*!
+     * Peek for a custom data type specified by the template typename used,
+     * with size being automatically deduced by the compiler (through the use of sizeof).
+     *
+     * Returns true if peeking succeeds.
+     * In case of failure, @a type value is automatically cleared by its deduced size.
+     */
+    template <typename T>
+    bool peekCustomType(T& type) const noexcept
+    {
+        if (tryPeek(&type, sizeof(T)))
             return true;
 
         std::memset(&type, 0, sizeof(T));
@@ -535,14 +579,14 @@ protected:
     bool tryRead(void* const buf, const uint32_t size) noexcept
     {
         DISTRHO_SAFE_ASSERT_RETURN(buffer != nullptr, false);
-        #if defined(__clang__)
-        # pragma clang diagnostic push
-        # pragma clang diagnostic ignored "-Wtautological-pointer-compare"
-        #endif
+       #if defined(__clang__)
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wtautological-pointer-compare"
+       #endif
         DISTRHO_SAFE_ASSERT_RETURN(buffer->buf != nullptr, false);
-        #if defined(__clang__)
-        # pragma clang diagnostic pop
-        #endif
+       #if defined(__clang__)
+        #pragma clang diagnostic pop
+       #endif
         DISTRHO_SAFE_ASSERT_RETURN(buf != nullptr, false);
         DISTRHO_SAFE_ASSERT_RETURN(size > 0, false);
         DISTRHO_SAFE_ASSERT_RETURN(size < buffer->size, false);
@@ -551,11 +595,11 @@ protected:
         if (buffer->head == buffer->tail)
             return false;
 
-        uint8_t* const bytebuf(static_cast<uint8_t*>(buf));
+        uint8_t* const bytebuf = static_cast<uint8_t*>(buf);
 
-        const uint32_t head(buffer->head);
-        const uint32_t tail(buffer->tail);
-        const uint32_t wrap((head > tail) ? 0 : buffer->size);
+        const uint32_t head = buffer->head;
+        const uint32_t tail = buffer->tail;
+        const uint32_t wrap = head > tail ? 0 : buffer->size;
 
         if (size > wrap + head - tail)
         {
@@ -567,7 +611,7 @@ protected:
             return false;
         }
 
-        uint32_t readto(tail + size);
+        uint32_t readto = tail + size;
 
         if (readto > buffer->size)
         {
@@ -579,7 +623,7 @@ protected:
             }
             else
             {
-                const uint32_t firstpart(buffer->size - tail);
+                const uint32_t firstpart = buffer->size - tail;
                 std::memcpy(bytebuf, buffer->buf + tail, firstpart);
                 std::memcpy(bytebuf + firstpart, buffer->buf, readto);
             }
@@ -597,6 +641,63 @@ protected:
         return true;
     }
 
+    /** @internal try reading from the buffer, can fail. */
+    bool tryPeek(void* const buf, const uint32_t size) const noexcept
+    {
+        DISTRHO_SAFE_ASSERT_RETURN(buffer != nullptr, false);
+       #if defined(__clang__)
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wtautological-pointer-compare"
+       #endif
+        DISTRHO_SAFE_ASSERT_RETURN(buffer->buf != nullptr, false);
+       #if defined(__clang__)
+        #pragma clang diagnostic pop
+       #endif
+        DISTRHO_SAFE_ASSERT_RETURN(buf != nullptr, false);
+        DISTRHO_SAFE_ASSERT_RETURN(size > 0, false);
+        DISTRHO_SAFE_ASSERT_RETURN(size < buffer->size, false);
+
+        // empty
+        if (buffer->head == buffer->tail)
+            return false;
+
+        uint8_t* const bytebuf = static_cast<uint8_t*>(buf);
+
+        const uint32_t head = buffer->head;
+        const uint32_t tail = buffer->tail;
+        const uint32_t wrap = head > tail ? 0 : buffer->size;
+
+        if (size > wrap + head - tail)
+            return false;
+
+        uint32_t readto = tail + size;
+
+        if (readto > buffer->size)
+        {
+            readto -= buffer->size;
+
+            if (size == 1)
+            {
+                std::memcpy(bytebuf, buffer->buf + tail, 1);
+            }
+            else
+            {
+                const uint32_t firstpart = buffer->size - tail;
+                std::memcpy(bytebuf, buffer->buf + tail, firstpart);
+                std::memcpy(bytebuf + firstpart, buffer->buf, readto);
+            }
+        }
+        else
+        {
+            std::memcpy(bytebuf, buffer->buf + tail, size);
+
+            if (readto == buffer->size)
+                readto = 0;
+        }
+
+        return true;
+    }
+
     /** @internal try writing to the buffer, can fail. */
     bool tryWrite(const void* const buf, const uint32_t size) noexcept
     {
@@ -605,11 +706,11 @@ protected:
         DISTRHO_SAFE_ASSERT_RETURN(size > 0, false);
         DISTRHO_SAFE_ASSERT_UINT2_RETURN(size < buffer->size, size, buffer->size, false);
 
-        const uint8_t* const bytebuf(static_cast<const uint8_t*>(buf));
+        const uint8_t* const bytebuf = static_cast<const uint8_t*>(buf);
 
-        const uint32_t tail(buffer->tail);
-        const uint32_t wrtn(buffer->wrtn);
-        const uint32_t wrap((tail > wrtn) ? 0 : buffer->size);
+        const uint32_t tail = buffer->tail;
+        const uint32_t wrtn = buffer->wrtn;
+        const uint32_t wrap = tail > wrtn ? 0 : buffer->size;
 
         if (size >= wrap + tail - wrtn)
         {
@@ -622,7 +723,7 @@ protected:
             return false;
         }
 
-        uint32_t writeto(wrtn + size);
+        uint32_t writeto = wrtn + size;
 
         if (writeto > buffer->size)
         {
@@ -634,7 +735,7 @@ protected:
             }
             else
             {
-                const uint32_t firstpart(buffer->size - wrtn);
+                const uint32_t firstpart = buffer->size - wrtn;
                 std::memcpy(buffer->buf + wrtn, bytebuf, firstpart);
                 std::memcpy(buffer->buf, bytebuf + firstpart, writeto);
             }
@@ -690,12 +791,7 @@ class HeapRingBuffer : public RingBufferControl<HeapBuffer>
 public:
     /** Constructor. */
     HeapRingBuffer() noexcept
-        : heapBuffer(HeapBuffer_INIT)
-    {
-#ifndef DISTRHO_PROPER_CPP11_SUPPORT
-        std::memset(&heapBuffer, 0, sizeof(heapBuffer));
-#endif
-    }
+        : heapBuffer(CPP_AGGREGATE_INIT(HeapBuffer){0, 0, 0, 0, false, nullptr}) {}
 
     /** Destructor. */
     ~HeapRingBuffer() noexcept override
@@ -765,11 +861,8 @@ class SmallStackRingBuffer : public RingBufferControl<SmallStackBuffer>
 public:
     /** Constructor. */
     SmallStackRingBuffer() noexcept
-        : stackBuffer(StackBuffer_INIT)
+        : stackBuffer(CPP_AGGREGATE_INIT(SmallStackBuffer){0, 0, 0, false, {0}})
     {
-#ifndef DISTRHO_PROPER_CPP11_SUPPORT
-        std::memset(&stackBuffer, 0, sizeof(stackBuffer));
-#endif
         setRingBuffer(&stackBuffer, true);
     }
 

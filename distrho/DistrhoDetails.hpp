@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2023 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2024 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -224,6 +224,22 @@ enum ParameterDesignation {
 };
 
 /**
+   Parameter designation symbols.@n
+   These are static, hard-coded definitions to ensure consistency across DPF and plugins.
+*/
+namespace ParameterDesignationSymbols {
+   /**
+     Bypass designation symbol.
+    */
+   static constexpr const char bypass[] = "dpf_bypass";
+
+   /**
+     Bypass designation symbol, inverted for LV2 so it becomes "enabled".
+    */
+   static constexpr const char bypass_lv2[] = "lv2_enabled";
+};
+
+/**
    Predefined Port Groups Ids.
 
    This enumeration provides a few commonly used groups for convenient use in plugins.
@@ -332,7 +348,7 @@ struct ParameterRanges {
    /**
       Constructor using custom values.
     */
-    constexpr ParameterRanges(float df, float mn, float mx) noexcept
+    constexpr ParameterRanges(const float df, const float mn, const float mx) noexcept
         : def(df),
           min(mn),
           max(mx) {}
@@ -359,7 +375,7 @@ struct ParameterRanges {
    /**
       Get a fixed value within range.
     */
-    float getFixedValue(const float& value) const noexcept
+    float getFixedValue(const float value) const noexcept
     {
         if (value <= min)
             return min;
@@ -371,7 +387,7 @@ struct ParameterRanges {
    /**
       Get a value normalized to 0.0<->1.0.
     */
-    float getNormalizedValue(const float& value) const noexcept
+    float getNormalizedValue(const float value) const noexcept
     {
         const float normValue = (value - min) / (max - min);
 
@@ -400,7 +416,7 @@ struct ParameterRanges {
    /**
       Get a value normalized to 0.0<->1.0, fixed within range.
     */
-    float getFixedAndNormalizedValue(const float& value) const noexcept
+    float getFixedAndNormalizedValue(const float value) const noexcept
     {
         if (value <= min)
             return 0.0f;
@@ -421,7 +437,7 @@ struct ParameterRanges {
       Get a value normalized to 0.0<->1.0, fixed within range.
       Overloaded function using double precision values.
     */
-    double getFixedAndNormalizedValue(const double& value) const noexcept
+    double getFixedAndNormalizedValue(const double value) const noexcept
     {
         if (value <= min)
             return 0.0;
@@ -441,7 +457,7 @@ struct ParameterRanges {
    /**
       Get a proper value previously normalized to 0.0<->1.0.
     */
-    float getUnnormalizedValue(const float& value) const noexcept
+    float getUnnormalizedValue(const float value) const noexcept
     {
         if (value <= 0.0f)
             return min;
@@ -455,7 +471,7 @@ struct ParameterRanges {
       Get a proper value previously normalized to 0.0<->1.0.
       Overloaded function using double precision values.
     */
-    double getUnnormalizedValue(const double& value) const noexcept
+    double getUnnormalizedValue(const double value) const noexcept
     {
         if (value <= 0.0)
             return min;
@@ -495,15 +511,6 @@ struct ParameterEnumerationValue {
     ParameterEnumerationValue(float v, const char* l) noexcept
         : value(v),
           label(l) {}
-
-#if __cplusplus >= 201703L
-   /**
-      Constructor using custom values, constexpr compatible variant.
-    */
-    constexpr ParameterEnumerationValue(float v, const std::string_view& l) noexcept
-        : value(v),
-          label(l) {}
-#endif
 };
 
 /**
@@ -550,7 +557,7 @@ struct ParameterEnumerationValues {
       When using this constructor the pointer to @values MUST have been statically declared.@n
       It will not be automatically deleted later.
     */
-    constexpr ParameterEnumerationValues(uint32_t c, bool r, ParameterEnumerationValue* v) noexcept
+    constexpr ParameterEnumerationValues(uint8_t c, bool r, ParameterEnumerationValue* v) noexcept
         : count(c),
           restrictedMode(r),
           values(v),
@@ -562,6 +569,8 @@ struct ParameterEnumerationValues {
         if (deleteLater)
             delete[] values;
     }
+
+    DISTRHO_DECLARE_NON_COPYABLE(ParameterEnumerationValues)
 };
 
 /**
@@ -653,6 +662,7 @@ struct Parameter {
           shortName(),
           symbol(),
           unit(),
+          description(),
           ranges(),
           enumValues(),
           designation(kParameterDesignationNull),
@@ -668,6 +678,7 @@ struct Parameter {
           shortName(),
           symbol(s),
           unit(u),
+          description(),
           ranges(def, min, max),
           enumValues(),
           designation(kParameterDesignationNull),
@@ -686,31 +697,9 @@ struct Parameter {
           shortName(),
           symbol(s),
           unit(u),
+          description(),
           ranges(def, min, max),
           enumValues(evcount, true, ev),
-          designation(kParameterDesignationNull),
-          midiCC(0),
-          groupId(kPortGroupNone) {}
-#endif
-
-#if __cplusplus >= 201703L
-   /**
-      Constructor for constexpr compatible data.
-    */
-    constexpr Parameter(uint32_t h,
-                        const std::string_view& n,
-                        const std::string_view& sn,
-                        const std::string_view& sym,
-                        const std::string_view& u,
-                        const std::string_view& desc) noexcept
-        : hints(h),
-          name(n),
-          shortName(sn),
-          symbol(sym),
-          unit(u),
-          description(desc),
-          ranges(),
-          enumValues(),
           designation(kParameterDesignationNull),
           midiCC(0),
           groupId(kPortGroupNone) {}
@@ -731,7 +720,7 @@ struct Parameter {
             hints      = kParameterIsAutomatable|kParameterIsBoolean|kParameterIsInteger;
             name       = "Bypass";
             shortName  = "Bypass";
-            symbol     = "dpf_bypass";
+            symbol     = ParameterDesignationSymbols::bypass;
             unit       = "";
             midiCC     = 0;
             groupId    = kPortGroupNone;
@@ -741,17 +730,57 @@ struct Parameter {
             break;
         }
     }
-};
 
-#if __cplusplus >= 202001L /* TODO */
-/**
-   Bypass parameter definition in constexpr form.
- */
-static constexpr const Parameter kParameterBypass = {
-    kParameterIsAutomatable|kParameterIsBoolean|kParameterIsInteger,
-    "Bypass", "Bypass", "dpf_bypass", "", "", {}, {}, 0, kPortGroupNone,
+    Parameter& operator=(Parameter& other) noexcept
+    {
+         hints = other.hints;
+         name = other.name;
+         shortName = other.shortName;
+         symbol = other.symbol;
+         unit = other.unit;
+         description = other.description;
+         ranges = other.ranges;
+         designation = other.designation;
+         midiCC = other.midiCC;
+         groupId = other.groupId;
+
+         // enumValues needs special handling
+         enumValues.count = other.enumValues.count;
+         enumValues.restrictedMode = other.enumValues.restrictedMode;
+         enumValues.values = other.enumValues.values;
+         enumValues.deleteLater = other.enumValues.deleteLater;
+
+         // make sure to not delete data twice
+         other.enumValues.deleteLater = false;
+
+         return *this;
+    }
+
+    Parameter& operator=(const Parameter& other) noexcept
+    {
+         hints = other.hints;
+         name = other.name;
+         shortName = other.shortName;
+         symbol = other.symbol;
+         unit = other.unit;
+         description = other.description;
+         ranges = other.ranges;
+         designation = other.designation;
+         midiCC = other.midiCC;
+         groupId = other.groupId;
+
+         // make sure to not delete data twice
+         DISTRHO_SAFE_ASSERT_RETURN(other.enumValues.values == nullptr || !other.enumValues.deleteLater, *this);
+
+         // enumValues needs special handling
+         enumValues.count = other.enumValues.count;
+         enumValues.restrictedMode = other.enumValues.restrictedMode;
+         enumValues.values = other.enumValues.values;
+         enumValues.deleteLater = other.enumValues.deleteLater;
+
+         return *this;
+    }
 };
-#endif
 
 /**
    Port Group.@n

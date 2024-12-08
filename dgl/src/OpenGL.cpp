@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2021 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2024 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -691,12 +691,12 @@ void SubWidget::PrivateData::display(const uint width, const uint height, const 
         const int w = static_cast<int>(self->getWidth());
         const int h = static_cast<int>(self->getHeight());
 
-        if (viewportScaleFactor != 0.0 && viewportScaleFactor != 1.0)
+        if (d_isNotZero(viewportScaleFactor) && d_isNotEqual(viewportScaleFactor, 1.0))
         {
             glViewport(x,
-                       -static_cast<int>(height * viewportScaleFactor - height + absolutePos.getY() + 0.5),
-                       static_cast<int>(width * viewportScaleFactor + 0.5),
-                       static_cast<int>(height * viewportScaleFactor + 0.5));
+                       -d_roundToIntPositive(height * viewportScaleFactor - height + absolutePos.getY()),
+                       d_roundToIntPositive(width * viewportScaleFactor),
+                       d_roundToIntPositive(height * viewportScaleFactor));
         }
         else
         {
@@ -707,26 +707,21 @@ void SubWidget::PrivateData::display(const uint width, const uint height, const 
     else if (needsFullViewportForDrawing || (absolutePos.isZero() && self->getSize() == Size<uint>(width, height)))
     {
         // full viewport size
-        glViewport(0,
-                   -static_cast<int>(height * autoScaleFactor - height + 0.5),
-                   static_cast<int>(width * autoScaleFactor + 0.5),
-                   static_cast<int>(height * autoScaleFactor + 0.5));
+        glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
     }
     else
     {
         // set viewport pos
-        glViewport(static_cast<int>(absolutePos.getX() * autoScaleFactor + 0.5),
-                   -static_cast<int>(std::round((height * autoScaleFactor - height)
-                                     + (absolutePos.getY() * autoScaleFactor))),
-                   static_cast<int>(std::round(width * autoScaleFactor)),
-                   static_cast<int>(std::round(height * autoScaleFactor)));
+        glViewport(d_roundToIntPositive(absolutePos.getX() * autoScaleFactor),
+                   -d_roundToIntPositive(absolutePos.getY() * autoScaleFactor),
+                   static_cast<int>(width),
+                   static_cast<int>(height));
 
         // then cut the outer bounds
-        glScissor(static_cast<int>(absolutePos.getX() * autoScaleFactor + 0.5),
-                  static_cast<int>(height - std::round((static_cast<int>(self->getHeight()) + absolutePos.getY())
-                                                       * autoScaleFactor)),
-                  static_cast<int>(std::round(self->getWidth() * autoScaleFactor)),
-                  static_cast<int>(std::round(self->getHeight() * autoScaleFactor)));
+        glScissor(d_roundToIntPositive(absolutePos.getX() * autoScaleFactor),
+                  d_roundToIntPositive(height - (static_cast<int>(self->getHeight()) + absolutePos.getY()) * autoScaleFactor),
+                  d_roundToIntPositive(self->getWidth() * autoScaleFactor),
+                  d_roundToIntPositive(self->getHeight() * autoScaleFactor));
 
         glEnable(GL_SCISSOR_TEST);
         needsDisableScissor = true;
@@ -752,26 +747,14 @@ void TopLevelWidget::PrivateData::display()
     const uint width  = size.getWidth();
     const uint height = size.getHeight();
 
-    const double autoScaleFactor = window.pData->autoScaleFactor;
-
     // full viewport size
-    if (window.pData->autoScaling)
-    {
-        glViewport(0,
-                   -static_cast<int>(height * autoScaleFactor - height + 0.5),
-                   static_cast<int>(width * autoScaleFactor + 0.5),
-                   static_cast<int>(height * autoScaleFactor + 0.5));
-    }
-    else
-    {
-        glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
-    }
+    glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
 
     // main widget drawing
     self->onDisplay();
 
     // now draw subwidgets if there are any
-    selfw->pData->displaySubWidgets(width, height, autoScaleFactor);
+    selfw->pData->displaySubWidgets(width, height, window.pData->autoScaleFactor);
 }
 
 // -----------------------------------------------------------------------

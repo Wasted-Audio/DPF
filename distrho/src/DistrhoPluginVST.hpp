@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2022 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2024 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -23,17 +23,7 @@
 #include <algorithm>
 #include <cmath>
 
-#if DISTRHO_PLUGIN_HAS_UI && ! DISTRHO_PLUGIN_HAS_EMBED_UI
-# undef DISTRHO_PLUGIN_HAS_UI
-# define DISTRHO_PLUGIN_HAS_UI 0
-#endif
-
-#if DISTRHO_PLUGIN_HAS_UI && ! defined(HAVE_DGL) && ! DISTRHO_PLUGIN_HAS_EXTERNAL_UI
-# undef DISTRHO_PLUGIN_HAS_UI
-# define DISTRHO_PLUGIN_HAS_UI 0
-#endif
-
-#if DISTRHO_PLUGIN_HAS_UI && ! DISTRHO_PLUGIN_HAS_EXTERNAL_UI
+#if DISTRHO_PLUGIN_HAS_UI
 # include "Base.hpp"
 #endif
 
@@ -45,7 +35,7 @@
 
 // --------------------------------------------------------------------------------------------------------------------
 
-#ifdef DISTRHO_PROPER_CPP11_SUPPORT
+#if defined(DISTRHO_PROPER_CPP11_SUPPORT) || defined(DISTRHO_OS_MAC)
 # include <atomic>
 #else
 // quick and dirty std::atomic replacement for the things we need
@@ -80,8 +70,7 @@ enum Vst3InternalParameters {
     kVst3InternalParameterBaseCount,
    #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
     kVst3InternalParameterMidiCC_start = kVst3InternalParameterBaseCount,
-    kVst3InternalParameterMidiCC_end = kVst3InternalParameterMidiCC_start + 130*16,
-    kVst3InternalParameterCount = kVst3InternalParameterMidiCC_end
+    kVst3InternalParameterCount = kVst3InternalParameterMidiCC_start + 130 * 16
    #else
     kVst3InternalParameterCount = kVst3InternalParameterBaseCount
    #endif
@@ -224,7 +213,7 @@ void snprintf_u32_utf16(int16_t* const dst, const uint32_t value, const size_t s
     return snprintf_utf16_t<uint32_t>(dst, value, "%u", size);
 }
 
-#if DISTRHO_PLUGIN_HAS_UI && ! DISTRHO_PLUGIN_HAS_EXTERNAL_UI
+#if DISTRHO_PLUGIN_HAS_UI
 // --------------------------------------------------------------------------------------------------------------------
 // translate a vstgui-based key character and code to matching values used by DPF
 
@@ -248,7 +237,7 @@ uint translateVstKeyCode(bool& special, const int16_t keychar, const int16_t key
     // 18 print
     // 19 \n (handled below)
     // 20 snapshot
-    case 22: return kKeyDelete; 
+    case 22: return kKeyDelete;
     // 23 help
     // 57 = (handled below)
     // numpad stuff follows
@@ -295,9 +284,9 @@ uint translateVstKeyCode(bool& special, const int16_t keychar, const int16_t key
     case 10: return kKeyHome;
     case  9: return kKeyEnd;
     case 21: return kKeyInsert;
-    case 54: return kKeyShift;
-    case 55: return kKeyControl;
-    case 56: return kKeyAlt;
+    case 54: return kKeyShiftL;
+    case 55: return kKeyControlL;
+    case 56: return kKeyAltL;
     case 58: return kKeyMenu;
     case 52: return kKeyNumLock;
     case 53: return kKeyScrollLock;

@@ -49,6 +49,9 @@ static constexpr const setStateFunc setStateCallback = nullptr;
 static constexpr const sendNoteFunc sendNoteCallback = nullptr;
 #endif
 
+// unwanted in LV2, resize extension is deprecated and hosts can do it without extensions
+static constexpr const setSizeFunc setSizeCallback = nullptr;
+
 // -----------------------------------------------------------------------
 
 template <class LV2F>
@@ -88,7 +91,7 @@ public:
           fController(controller),
           fWriteFunction(writeFunc),
           fURIDs(uridMap),
-          fBypassParameterIndex(fUiPortMap != nullptr ? fUiPortMap->port_index(fUiPortMap->handle, "lv2_enabled")
+          fBypassParameterIndex(fUiPortMap != nullptr ? fUiPortMap->port_index(fUiPortMap->handle, ParameterDesignationSymbols::bypass_lv2)
                                                       : LV2UI_INVALID_PORT_INDEX),
           fWinIdWasNull(winId == 0),
           fUI(this, winId, sampleRate,
@@ -96,7 +99,7 @@ public:
               setParameterCallback,
               setStateCallback,
               sendNoteCallback,
-              nullptr, // resize is very messy, hosts can do it without extensions
+              setSizeCallback,
               fileRequestCallback,
               bundlePath, dspPtr, scaleFactor, bgColor, fgColor, appClassName)
     {

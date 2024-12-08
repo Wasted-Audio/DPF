@@ -9,46 +9,34 @@ on:
       - '*'
 
 jobs:
-  ubuntu-20-04:
-    strategy:
-      matrix:
-        target: [linux-arm64, linux-armhf, linux-i686, linux-riscv64, linux-x86_64, win32, win64, pluginval]
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-      - uses: distrho/dpf-makefile-action@v1
-        with:
-          dpf_path: .
-          target: ${{ matrix.target }}
-
   ubuntu-22-04:
     strategy:
       matrix:
-        target: [linux-arm64, linux-armhf, linux-i686, linux-riscv64, linux-x86_64, win32, win64, pluginval]
+        target: [linux-arm64, linux-armhf, linux-i686, linux-x86_64, win32, win64, pluginval]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - uses: distrho/dpf-makefile-action@v1
         with:
           dpf_path: .
+          suffix: _22_04
           target: ${{ matrix.target }}
 
-  macos-11:
+  ubuntu-24-04:
     strategy:
       matrix:
-        target: [macos-intel, macos-universal, macos-10.15]
-    runs-on: macos-11
+        target: [linux-arm64, linux-armhf, linux-x86_64, pluginval]
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - uses: distrho/dpf-makefile-action@v1
         with:
           dpf_path: .
+          suffix: _24_04
           target: ${{ matrix.target }}
 
   macos-12:
@@ -57,10 +45,41 @@ jobs:
         target: [macos-intel, macos-universal, macos-10.15]
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - uses: distrho/dpf-makefile-action@v1
         with:
           dpf_path: .
+          suffix: _12
+          target: ${{ matrix.target }}
+
+  macos-13:
+    strategy:
+      matrix:
+        target: [macos-intel, macos-universal, macos-10.15]
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: distrho/dpf-makefile-action@v1
+        with:
+          dpf_path: .
+          suffix: _13
+          target: ${{ matrix.target }}
+
+  macos-14:
+    strategy:
+      matrix:
+        target: [macos-intel, macos-universal, macos-10.15]
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: distrho/dpf-makefile-action@v1
+        with:
+          dpf_path: .
+          suffix: _14
           target: ${{ matrix.target }}
