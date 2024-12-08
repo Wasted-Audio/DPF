@@ -104,7 +104,7 @@ struct WebBridge : NativeBridge {
 
             return WAB.audioContext === undefined ? 0 : 1;
         }) != 0;
-        
+
         if (!initialized)
         {
             d_stderr2("Failed to initialize web audio");
@@ -214,73 +214,112 @@ struct WebBridge : NativeBridge {
        #endif
     }
 
+    // bool requestAudioInput() override
+    // {
+    //     DISTRHO_SAFE_ASSERT_RETURN(DISTRHO_PLUGIN_NUM_INPUTS > 0, false);
+
+    //     EM_ASM({
+    //         var numInputs = $0;
+    //         var WAB = Module['WebAudioBridge'];
+
+    //         var constraints = {};
+    //         // we need to use this weird awkward way for objects, otherwise build fails
+    //         constraints['audio'] = true;
+    //         constraints['video'] = false;
+    //         constraints['autoGainControl'] = {};
+    //         constraints['autoGainControl']['ideal'] = false;
+    //         constraints['echoCancellation'] = {};
+    //         constraints['echoCancellation']['ideal'] = false;
+    //         constraints['noiseSuppression'] = {};
+    //         constraints['noiseSuppression']['ideal'] = false;
+    //         constraints['channelCount'] = {};
+    //         constraints['channelCount']['min'] = 0;
+    //         constraints['channelCount']['ideal'] = numInputs;
+    //         constraints['latency'] = {};
+    //         constraints['latency']['min'] = 0;
+    //         constraints['latency']['ideal'] = 0;
+    //         constraints['sampleSize'] = {};
+    //         constraints['sampleSize']['min'] = 8;
+    //         constraints['sampleSize']['max'] = 32;
+    //         constraints['sampleSize']['ideal'] = 16;
+    //         // old property for chrome
+    //         constraints['googAutoGainControl'] = false;
+
+    //         var success = function(stream) {
+    //             var tracks = stream.getAudioTracks();
+
+    //             // try to force as much as we can
+    //             for (var i in tracks) {
+    //                 var track = tracks[i];
+
+    //                 track.applyConstraints({'autoGainControl': { 'exact': false } })
+    //                 .then(function(){console.log("Mic/Input auto-gain control has been disabled")})
+    //                 .catch(function(){console.log("Cannot disable Mic/Input auto-gain")});
+
+    //                 track.applyConstraints({'echoCancellation': { 'exact': false } })
+    //                 .then(function(){console.log("Mic/Input echo-cancellation has been disabled")})
+    //                 .catch(function(){console.log("Cannot disable Mic/Input echo-cancellation")});
+
+    //                 track.applyConstraints({'noiseSuppression': { 'exact': false } })
+    //                 .then(function(){console.log("Mic/Input noise-suppression has been disabled")})
+    //                 .catch(function(){console.log("Cannot disable Mic/Input noise-suppression")});
+
+    //                 track.applyConstraints({'googAutoGainControl': { 'exact': false } })
+    //                 .then(function(){})
+    //                 .catch(function(){});
+    //             }
+
+    //             WAB.captureStreamNode = WAB.audioContext['createMediaStreamSource'](stream);
+    //             WAB.captureStreamNode.connect(WAB.processor);
+    //         };
+    //         var fail = function() {
+    //         };
+
+    //         if (navigator.mediaDevices !== undefined && navigator.mediaDevices.getUserMedia !== undefined) {
+    //             navigator.mediaDevices.getUserMedia(constraints).then(success).catch(fail);
+    //         } else if (navigator.webkitGetUserMedia !== undefined) {
+    //             navigator.webkitGetUserMedia(constraints, success, fail);
+    //         }
+    //     }, DISTRHO_PLUGIN_NUM_INPUTS_2);
+
+    //     return true;
+    // }
+
     bool requestAudioInput() override
     {
         DISTRHO_SAFE_ASSERT_RETURN(DISTRHO_PLUGIN_NUM_INPUTS > 0, false);
 
         EM_ASM({
-            var numInputs = $0;
             var WAB = Module['WebAudioBridge'];
+            var audioSelector = document.getElementById("audioSelector");
+            var audioElement = document.getElementById("audioElement");
 
-            var constraints = {};
-            // we need to use this weird awkward way for objects, otherwise build fails
-            constraints['audio'] = true;
-            constraints['video'] = false;
-            constraints['autoGainControl'] = {};
-            constraints['autoGainControl']['ideal'] = false;
-            constraints['echoCancellation'] = {};
-            constraints['echoCancellation']['ideal'] = false;
-            constraints['noiseSuppression'] = {};
-            constraints['noiseSuppression']['ideal'] = false;
-            constraints['channelCount'] = {};
-            constraints['channelCount']['min'] = 0;
-            constraints['channelCount']['ideal'] = numInputs;
-            constraints['latency'] = {};
-            constraints['latency']['min'] = 0;
-            constraints['latency']['ideal'] = 0;
-            constraints['sampleSize'] = {};
-            constraints['sampleSize']['min'] = 8;
-            constraints['sampleSize']['max'] = 32;
-            constraints['sampleSize']['ideal'] = 16;
-            // old property for chrome
-            constraints['googAutoGainControl'] = false;
+            // When the dropdown selection changes
+            audioSelector.addEventListener("change", function(e) {
+                const selectedAudioFile = audioSelector.value;
 
-            var success = function(stream) {
-                var tracks = stream.getAudioTracks();
+                // Pause the current audio if it's playing
+                audioElement.pause();
 
-                // try to force as much as we can
-                for (var i in tracks) {
-                    var track = tracks[i];
+                // Create a new audio element for the selected audio file
+                const newAudioElement = new Audio(selectedAudioFile);
 
-                    track.applyConstraints({'autoGainControl': { 'exact': false } })
-                    .then(function(){console.log("Mic/Input auto-gain control has been disabled")})
-                    .catch(function(){console.log("Cannot disable Mic/Input auto-gain")});
+                // Set the src of the audio element to the selected audio file
+                newAudioElement.src = selectedAudioFile;
 
-                    track.applyConstraints({'echoCancellation': { 'exact': false } })
-                    .then(function(){console.log("Mic/Input echo-cancellation has been disabled")})
-                    .catch(function(){console.log("Cannot disable Mic/Input echo-cancellation")});
+                // Create a MediaElementSource from the updated audio element
+                newAudioElement.play();
+                newAudioElement.loop = true;
+                WAB.captureStreamNode = WAB.audioContext['createMediaElementSource'](newAudioElement);
 
-                    track.applyConstraints({'noiseSuppression': { 'exact': false } })
-                    .then(function(){console.log("Mic/Input noise-suppression has been disabled")})
-                    .catch(function(){console.log("Cannot disable Mic/Input noise-suppression")});
-
-                    track.applyConstraints({'googAutoGainControl': { 'exact': false } })
-                    .then(function(){})
-                    .catch(function(){});
-                }
-
-                WAB.captureStreamNode = WAB.audioContext['createMediaStreamSource'](stream);
+                // Connect the MediaElementSource to the AudioContext's processor
                 WAB.captureStreamNode.connect(WAB.processor);
-            };
-            var fail = function() {
-            };
 
-            if (navigator.mediaDevices !== undefined && navigator.mediaDevices.getUserMedia !== undefined) {
-                navigator.mediaDevices.getUserMedia(constraints).then(success).catch(fail);
-            } else if (navigator.webkitGetUserMedia !== undefined) {
-                navigator.webkitGetUserMedia(constraints, success, fail);
-            }
-        }, DISTRHO_PLUGIN_NUM_INPUTS_2);
+                // Replace the old audio element with the new one
+                audioElement.parentNode.replaceChild(newAudioElement, audioElement);
+                audioElement = newAudioElement;
+            });
+        });
 
         return true;
     }
