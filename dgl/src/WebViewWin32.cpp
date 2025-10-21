@@ -14,27 +14,10 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef DGL_IMAGE_HPP_INCLUDED
-#define DGL_IMAGE_HPP_INCLUDED
+// Include CHOC separately because it requires C++17
 
-#if defined(DGL_CAIRO)
-# include "Cairo.hpp"
-#elif defined(DGL_OPENGL)
-# include "OpenGL.hpp"
-#elif defined(DGL_VULKAN)
-# include "Vulkan.hpp"
-#else
-# include "Base.hpp"
-#endif
-
-START_NAMESPACE_DGL
-
-#if defined(DGL_CAIRO)
-typedef CairoImage Image;
-#elif defined(DGL_OPENGL)
-typedef OpenGLImage Image;
-#endif
-
-END_NAMESPACE_DGL
-
-#endif
+#define DISTRHO_WEB_VIEW_INCLUDE_IMPLEMENTATION
+#define WEB_VIEW_NAMESPACE DGL_NAMESPACE
+#define WEB_VIEW_DGL_NAMESPACE
+#include "../WebView.hpp"
+#include "../../distrho/extra/WebViewWin32.hpp"

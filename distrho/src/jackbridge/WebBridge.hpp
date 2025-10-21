@@ -294,6 +294,65 @@ struct WebBridge : NativeBridge {
             var audioSelector = document.getElementById("audioSelector");
             var audioElement = document.getElementById("audioElement");
 
+<<<<<<< HEAD
+=======
+            var constraints = {};
+            // we need to use this weird awkward way for objects, otherwise build fails
+            constraints['video'] = false;
+            constraints['audio'] = {};
+            constraints['audio']['autoGainControl'] = {};
+            constraints['audio']['autoGainControl']['ideal'] = false;
+            constraints['audio']['echoCancellation'] = {};
+            constraints['audio']['echoCancellation']['ideal'] = false;
+            constraints['audio']['noiseSuppression'] = {};
+            constraints['audio']['noiseSuppression']['ideal'] = false;
+            constraints['audio']['channelCount'] = {};
+            constraints['audio']['channelCount']['min'] = 0;
+            constraints['audio']['channelCount']['ideal'] = numInputs;
+            constraints['audio']['latency'] = {};
+            constraints['audio']['latency']['min'] = 0;
+            constraints['audio']['latency']['ideal'] = 0;
+            constraints['audio']['sampleSize'] = {};
+            constraints['audio']['sampleSize']['min'] = 8;
+            constraints['audio']['sampleSize']['max'] = 32;
+            constraints['audio']['sampleSize']['ideal'] = 16;
+            // old properties for chrome
+            constraints['audio']['googAudioMirroring'] = {};
+            constraints['audio']['googAudioMirroring']['ideal'] = false;
+            constraints['audio']['googAutoGainControl'] = {};
+            constraints['audio']['googAutoGainControl']['ideal'] = false;
+            constraints['audio']['googAutoGainControl2'] = {};
+            constraints['audio']['googAutoGainControl2']['ideal'] = false;
+            constraints['audio']['googDAEchoCancellation'] = {};
+            constraints['audio']['googDAEchoCancellation']['ideal'] = false;
+            constraints['audio']['googEchoCancellation'] = {};
+            constraints['audio']['googEchoCancellation']['ideal'] = false;
+            constraints['audio']['googEchoCancellation2'] = {};
+            constraints['audio']['googEchoCancellation2']['ideal'] = false;
+            constraints['audio']['googHighpassFilter'] = {};
+            constraints['audio']['googHighpassFilter']['ideal'] = false;
+            constraints['audio']['googNoiseSuppression'] = {};
+            constraints['audio']['googNoiseSuppression']['ideal'] = false;
+            constraints['audio']['googNoiseSuppression2'] = {};
+            constraints['audio']['googNoiseSuppression2']['ideal'] = false;
+            constraints['audio']['googTypingNoiseDetection'] = {};
+            constraints['audio']['googTypingNoiseDetection']['ideal'] = false;
+            constraints['audio']['intelligibilityEnhancer'] = {};
+            constraints['audio']['intelligibilityEnhancer']['ideal'] = false;
+            constraints['audio']['levelControl'] = {};
+            constraints['audio']['levelControl']['ideal'] = false;
+            constraints['audio']['levelControlInitialPeakLevelDBFS'] = {};
+            constraints['audio']['levelControlInitialPeakLevelDBFS']['ideal'] = false;
+
+            var success = function(stream) {
+                WAB.captureStreamNode = WAB.audioContext['createMediaStreamSource'](stream);
+                WAB.captureStreamNode.connect(WAB.processor);
+            };
+            var fail = function(err) {
+                console.error(err);
+            };
+>>>>>>> main
+
             // When the dropdown selection changes
             audioSelector.addEventListener("change", function(e) {
                 const selectedAudioFile = audioSelector.value;
@@ -533,7 +592,7 @@ struct WebBridge : NativeBridge {
                     }, offset, bytes[0], bytes[1], bytes[2], bytes[3], timestamp);
                 }
 
-                self->midiOutBuffer.clearData();
+                self->midiOutBuffer.flush();
             }
            #endif
         }

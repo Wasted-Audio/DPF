@@ -14,27 +14,15 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef DGL_IMAGE_HPP_INCLUDED
-#define DGL_IMAGE_HPP_INCLUDED
+#ifndef DGL_WEB_VIEW_HPP_INCLUDED
+#define DGL_WEB_VIEW_HPP_INCLUDED
 
-#if defined(DGL_CAIRO)
-# include "Cairo.hpp"
-#elif defined(DGL_OPENGL)
-# include "OpenGL.hpp"
-#elif defined(DGL_VULKAN)
-# include "Vulkan.hpp"
-#else
-# include "Base.hpp"
-#endif
+#include "Base.hpp"
 
 START_NAMESPACE_DGL
 
-#if defined(DGL_CAIRO)
-typedef CairoImage Image;
-#elif defined(DGL_OPENGL)
-typedef OpenGLImage Image;
-#endif
+#include "../distrho/extra/WebViewImpl.hpp"
 
 END_NAMESPACE_DGL
 
-#endif
+#endif // DGL_WEB_VIEW_HPP_INCLUDED
