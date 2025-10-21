@@ -294,8 +294,6 @@ struct WebBridge : NativeBridge {
             var audioSelector = document.getElementById("audioSelector");
             var audioElement = document.getElementById("audioElement");
 
-<<<<<<< HEAD
-=======
             var constraints = {};
             // we need to use this weird awkward way for objects, otherwise build fails
             constraints['video'] = false;
@@ -351,7 +349,6 @@ struct WebBridge : NativeBridge {
             var fail = function(err) {
                 console.error(err);
             };
->>>>>>> main
 
             // When the dropdown selection changes
             audioSelector.addEventListener("change", function(e) {
