@@ -235,7 +235,8 @@ struct WebBridge : NativeBridge {
             constraints['audio']['noiseSuppression']['ideal'] = false;
             constraints['audio']['channelCount'] = {};
             constraints['audio']['channelCount']['min'] = 0;
-            constraints['audio']['channelCount']['ideal'] = numInputs;
+            // constraints['audio']['channelCount']['ideal'] = numInputs;
+            constraints['audio']['channelCount']['ideal'] = 2;
             constraints['audio']['latency'] = {};
             constraints['audio']['latency']['min'] = 0;
             constraints['audio']['latency']['ideal'] = 0;
@@ -271,6 +272,7 @@ struct WebBridge : NativeBridge {
             constraints['audio']['levelControlInitialPeakLevelDBFS'] = {};
             constraints['audio']['levelControlInitialPeakLevelDBFS']['ideal'] = false;
 
+
             var success = function(stream) {
                 WAB.captureStreamNode = WAB.audioContext['createMediaStreamSource'](stream);
                 WAB.captureStreamNode.connect(WAB.processor);
@@ -279,9 +281,13 @@ struct WebBridge : NativeBridge {
                 console.error(err);
             };
 
+            console.log("Activated context");
+
             // When the dropdown selection changes
             audioSelector.addEventListener("change", function(e) {
                 const selectedAudioFile = audioSelector.value;
+
+                console.log("Selected audio file: " + selectedAudioFile);
 
                 // Pause the current audio if it's playing
                 audioElement.pause();
@@ -304,7 +310,7 @@ struct WebBridge : NativeBridge {
                 audioElement.parentNode.replaceChild(newAudioElement, audioElement);
                 audioElement = newAudioElement;
             });
-        });
+        }, DISTRHO_PLUGIN_NUM_INPUTS_2);
 
         return true;
     }
