@@ -24,7 +24,7 @@ endif
 # ---------------------------------------------------------------------------------------------------------------------
 
 MANUAL_TESTS  =
-UNIT_TESTS    = Color Point
+UNIT_TESTS    = Base64 Color Point
 
 ifeq ($(HAVE_CAIRO),true)
 MANUAL_TESTS += Demo.cairo
