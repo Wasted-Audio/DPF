@@ -699,7 +699,7 @@ public:
         char* strBuf = static_cast<char*>(std::malloc(strBufSize));
         DISTRHO_SAFE_ASSERT_RETURN(strBuf != nullptr, String());
 
-        strBuf[strBufSize] = '\0';
+        strBuf[strBufSize - 1] = '\0';
         size_t strBufIndex = 0;
 
         const uchar* bytesToEncode = static_cast<const uchar*>(data);

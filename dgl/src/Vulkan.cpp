@@ -76,7 +76,7 @@ void Line<T>::draw(const GraphicsContext&, T)
     notImplemented("Line::draw");
 }
 
-#ifdef DGL_ALLOW_DEPRECATED_METHODS
+#if DGL_ALLOW_DEPRECATED_METHODS
 template<typename T>
 void Line<T>::draw()
 {
@@ -106,7 +106,7 @@ void Circle<T>::drawOutline(const GraphicsContext&, T)
     notImplemented("Circle::drawOutline");
 }
 
-#ifdef DGL_ALLOW_DEPRECATED_METHODS
+#if DGL_ALLOW_DEPRECATED_METHODS
 template<typename T>
 void Circle<T>::draw()
 {
@@ -142,7 +142,7 @@ void Triangle<T>::drawOutline(const GraphicsContext&, T)
     notImplemented("Triangle::drawOutline");
 }
 
-#ifdef DGL_ALLOW_DEPRECATED_METHODS
+#if DGL_ALLOW_DEPRECATED_METHODS
 template<typename T>
 void Triangle<T>::draw()
 {
@@ -178,7 +178,7 @@ void Rectangle<T>::drawOutline(const GraphicsContext&, T)
     notImplemented("Rectangle::drawOutline");
 }
 
-#ifdef DGL_ALLOW_DEPRECATED_METHODS
+#if DGL_ALLOW_DEPRECATED_METHODS
 template<typename T>
 void Rectangle<T>::draw()
 {
@@ -289,8 +289,38 @@ void Window::PrivateData::endContext()
 {
 }
 
-// -----------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
+#ifndef DGL_GEOMETRY_CPP_INCLUDED
+template class Line<double>;
+template class Line<float>;
+template class Line<int>;
+template class Line<uint>;
+template class Line<short>;
+template class Line<ushort>;
+
+template class Circle<double>;
+template class Circle<float>;
+template class Circle<int>;
+template class Circle<uint>;
+template class Circle<short>;
+template class Circle<ushort>;
+
+template class Triangle<double>;
+template class Triangle<float>;
+template class Triangle<int>;
+template class Triangle<uint>;
+template class Triangle<short>;
+template class Triangle<ushort>;
+
+template class Rectangle<double>;
+template class Rectangle<float>;
+template class Rectangle<int>;
+template class Rectangle<uint>;
+template class Rectangle<short>;
+template class Rectangle<ushort>;
+#endif
+
+// --------------------------------------------------------------------------------------------------------------------
 
 END_NAMESPACE_DGL
-
-// -----------------------------------------------------------------------

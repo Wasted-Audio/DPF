@@ -84,6 +84,13 @@ jobs:
       run: |
         make clean >/dev/null
         make -j ${{ env.JOBS }}
+    - name: No deprecated methods allowed
+      env:
+        CFLAGS: -Werror
+        CXXFLAGS: -Werror -DDGL_ALLOW_DEPRECATED_METHODS=0
+      run: |
+        make clean >/dev/null
+        make -j ${{ env.JOBS }}
     - name: No namespace
       env:
         CFLAGS: -Werror
