@@ -452,7 +452,7 @@ SYMBOLS_LADSPA = -sEXPORTED_FUNCTIONS="['ladspa_descriptor']"
 SYMBOLS_LV2    = -sEXPORTED_FUNCTIONS="['lv2_descriptor','lv2_generate_ttl','lv2ui_descriptor']"
 SYMBOLS_LV2DSP = -sEXPORTED_FUNCTIONS="['lv2_descriptor','lv2_generate_ttl']"
 SYMBOLS_LV2UI  = -sEXPORTED_FUNCTIONS="['lv2ui_descriptor']"
-SYMBOLS_MAPI   = -sEXPORTED_FUNCTIONS="['_malloc','_free','_mapi_create','_mapi_process','_mapi_set_parameter','_mapi_set_state','_mapi_destroy']"
+SYMBOLS_MAPI   = -sEXPORTED_FUNCTIONS="['_malloc','_free','_mapi_create','_mapi_process','_mapi_get_parameter','_mapi_set_parameter','_mapi_set_state','_mapi_destroy']"
 SYMBOLS_VST2   = -sEXPORTED_FUNCTIONS="['VSTPluginMain']"
 SYMBOLS_VST3   = -sEXPORTED_FUNCTIONS="['GetPluginFactory','ModuleEntry','ModuleExit']"
 else ifeq ($(WINDOWS),true)
