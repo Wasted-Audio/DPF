@@ -652,9 +652,9 @@ $(dssi_ui): $(OBJS_UI) $(BUILD_DIR)/DistrhoUIMain_DSSI.cpp.o $(DGL_LIB)
 # ---------------------------------------------------------------------------------------------------------------------
 # LV2
 
-lv2: $(lv2)
-lv2_dsp: $(lv2_dsp)
-lv2_sep: $(lv2_dsp) $(lv2_ui)
+lv2: $(lv2) $(lv2files)
+lv2_dsp: $(lv2_dsp) $(lv2files)
+lv2_sep: $(lv2_dsp) $(lv2_ui) $(lv2files)
 
 ifeq ($(HAVE_DGL),true)
 $(lv2): $(OBJS_DSP) $(OBJS_UI) $(BUILD_DIR)/DistrhoPluginMain_LV2_single_obj.cpp.o $(BUILD_DIR)/DistrhoUIMain_LV2_single_obj.cpp.o $(DGL_LIB) $(DGL_LIB_SHARED)
