@@ -379,7 +379,6 @@ MAPI_SHARED = \
 	-sALLOW_TABLE_GROWTH \
 	-sEXPORT_NAME="$(MAPI_MODULE_NAME)" \
 	-sEXPORTED_RUNTIME_METHODS=['addFunction','lengthBytesUTF8','stringToUTF8','UTF8ToString'] \
-	-sMAIN_MODULE=2 \
 	-sMODULARIZE=1
 else
 MAPI_EXT    = $(LIB_EXT)
