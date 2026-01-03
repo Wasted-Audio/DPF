@@ -235,19 +235,11 @@ VulkanImage& VulkanImage::operator=(const VulkanImage& image) noexcept
 
 // -----------------------------------------------------------------------
 
-void SubWidget::PrivateData::display(const uint width, const uint height
-                                    #if DGL_ALLOW_DEPRECATED_METHODS
-                                     , const double autoScaleFactor
-                                    #endif
-                                     )
+void SubWidget::PrivateData::display(const uint width, const uint height, const double autoScaleFactor)
 {
     // TODO
 
-   #if DGL_ALLOW_DEPRECATED_METHODS
     selfw->pData->displaySubWidgets(width, height, autoScaleFactor);
-   #else
-    selfw->pData->displaySubWidgets(width, height);
-   #endif
 }
 
 // -----------------------------------------------------------------------
@@ -267,11 +259,7 @@ void TopLevelWidget::PrivateData::display()
     self->onDisplay();
 
     // now draw subwidgets if there are any
-    selfw->pData->displaySubWidgets(width, height
-                                   #if DGL_ALLOW_DEPRECATED_METHODS
-                                    , window.pData->autoScaleFactor
-                                   #endif
-                                    );
+    selfw->pData->displaySubWidgets(width, height, window.pData->autoScaleFactor);
 }
 
 // -----------------------------------------------------------------------

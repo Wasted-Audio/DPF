@@ -394,6 +394,16 @@ public:
     double getScaleFactor() const noexcept;
 
    /**
+      Enable automatic internal scaling based on a custom width and height.
+      This will internally scale up drawing and scale down user events coordinates and sizes,
+      but the result is likely blurry.
+
+      This can be used as an early step for high-dpi support,
+      that scales up the window contents in a blurry but usable way.
+    */
+    void enableInternalScalingWithSize(uint baseWidth, uint baseHeight, bool keepAspectRatio = false);
+
+   /**
       Grab the keyboard input focus.
     */
     void focus();

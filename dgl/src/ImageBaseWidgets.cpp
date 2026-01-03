@@ -31,9 +31,8 @@ ImageBaseAboutWindow<ImageType>::ImageBaseAboutWindow(Window& transientParentWin
 
     if (image.isValid())
     {
-        const double scaleFactor = getScaleFactor();
-        setSize(image.getSize() * scaleFactor);
-        setGeometryConstraints(image.getWidth() * scaleFactor, image.getHeight() * scaleFactor, true);
+        enableInternalScalingWithSize(image.getWidth(), image.getHeight(), true);
+        setSize(image.getSize());
     }
 
     done();
@@ -49,9 +48,8 @@ ImageBaseAboutWindow<ImageType>::ImageBaseAboutWindow(TopLevelWidget* const topL
 
     if (image.isValid())
     {
-        const double scaleFactor = getScaleFactor();
-        setSize(image.getSize() * scaleFactor);
-        setGeometryConstraints(image.getWidth(), image.getHeight(), true);
+        enableInternalScalingWithSize(image.getWidth(), image.getHeight(), true);
+        setSize(image.getSize());
     }
 
     done();
@@ -73,9 +71,8 @@ void ImageBaseAboutWindow<ImageType>::setImage(const ImageType& image)
 
     img = image;
 
-    const double scaleFactor = getScaleFactor();
-    setSize(image.getSize() * scaleFactor);
-    setGeometryConstraints(image.getWidth() * scaleFactor, image.getHeight() * scaleFactor, true);
+    enableInternalScalingWithSize(image.getWidth(), image.getHeight(), true);
+    setSize(image.getSize());
 
     done();
 }

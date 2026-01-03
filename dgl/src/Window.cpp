@@ -270,20 +270,20 @@ void Window::setSize(uint width, uint height)
 {
     DISTRHO_SAFE_ASSERT_UINT2_RETURN(width > 1 && height > 1, width, height,);
 
+    const double scaleFactor = pData->scaleFactor;
+
     if (pData->isEmbed)
     {
         uint minWidth = pData->minWidth;
         uint minHeight = pData->minHeight;
 
-       #if DGL_ALLOW_DEPRECATED_METHODS
-        const double scaleFactor = pData->scaleFactor;
-
         if (pData->autoScaling && d_isNotEqual(scaleFactor, 1.0))
         {
             minWidth = d_roundToUnsignedInt(minWidth * scaleFactor);
             minHeight = d_roundToUnsignedInt(minHeight * scaleFactor);
+            width = d_roundToUnsignedInt(width * scaleFactor);
+            height = d_roundToUnsignedInt(height * scaleFactor);
         }
-       #endif
 
         // handle geometry constraints here
         if (width < minWidth)
@@ -308,6 +308,14 @@ void Window::setSize(uint width, uint height)
                 else
                     height = d_roundToUnsignedInt(static_cast<double>(width) / ratio);
             }
+        }
+    }
+    else
+    {
+        if (pData->autoScaling && d_isNotEqual(scaleFactor, 1.0))
+        {
+            width = d_roundToUnsignedInt(width * scaleFactor);
+            height = d_roundToUnsignedInt(height * scaleFactor);
         }
     }
 
@@ -415,6 +423,35 @@ double Window::getScaleFactor() const noexcept
     return pData->scaleFactor;
 }
 
+void Window::enableInternalScalingWithSize(uint baseWidth, uint baseHeight, const bool keepAspectRatio)
+{
+    DISTRHO_SAFE_ASSERT_RETURN(baseWidth > 0,);
+    DISTRHO_SAFE_ASSERT_RETURN(baseHeight > 0,);
+
+    const Size<uint> size(getSize());
+    const double scaleHorizontal = size.getWidth() / static_cast<double>(baseWidth);
+    const double scaleVertical = size.getHeight() / static_cast<double>(baseHeight);
+
+    pData->minWidth = baseWidth;
+    pData->minHeight = baseHeight;
+    pData->autoScaling = true;
+    pData->autoScaleFactor = scaleHorizontal < scaleVertical ? scaleHorizontal : scaleVertical;
+    pData->keepAspectRatio = keepAspectRatio;
+
+    if (pData->view == nullptr)
+        return;
+
+    const double scaleFactor = pData->scaleFactor;
+
+    if (d_isNotEqual(scaleFactor, 1.0))
+    {
+        baseWidth = d_roundToUnsignedInt(baseWidth * scaleFactor);
+        baseHeight = d_roundToUnsignedInt(baseHeight * scaleFactor);
+    }
+
+    puglSetGeometryConstraints(pData->view, baseWidth, baseHeight, keepAspectRatio);
+}
+
 void Window::focus()
 {
     pData->focus();
@@ -465,7 +502,6 @@ void Window::repaint(const Rectangle<uint>& rect) noexcept
     uint width = rect.getWidth();
     uint height = rect.getHeight();
 
-   #if DGL_ALLOW_DEPRECATED_METHODS
     if (pData->autoScaling)
     {
         const double autoScaleFactor = pData->autoScaleFactor;
@@ -475,7 +511,6 @@ void Window::repaint(const Rectangle<uint>& rect) noexcept
         width = d_roundToUnsignedInt(width * autoScaleFactor);
         height = d_roundToUnsignedInt(height * autoScaleFactor);
     }
-   #endif
 
     puglObscureRegion(pData->view, x, y, width, height);
 }

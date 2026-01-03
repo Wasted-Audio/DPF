@@ -56,12 +56,7 @@ Widget::PrivateData::~PrivateData()
     std::free(name);
 }
 
-void Widget::PrivateData::displaySubWidgets(const uint width,
-                                            const uint height
-                                           #if DGL_ALLOW_DEPRECATED_METHODS
-                                            , const double autoScaleFactor
-                                           #endif
-                                            )
+void Widget::PrivateData::displaySubWidgets(const uint width, const uint height, const double autoScaleFactor)
 {
     if (subWidgets.size() == 0)
         return;
@@ -71,11 +66,7 @@ void Widget::PrivateData::displaySubWidgets(const uint width,
         SubWidget* const subwidget(*it);
 
         if (subwidget->isVisible())
-            subwidget->pData->display(width, height
-                                     #if DGL_ALLOW_DEPRECATED_METHODS
-                                      , autoScaleFactor
-                                     #endif
-                                      );
+            subwidget->pData->display(width, height, autoScaleFactor);
     }
 }
 

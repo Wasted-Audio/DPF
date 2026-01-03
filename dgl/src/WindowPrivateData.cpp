@@ -116,10 +116,8 @@ Window::PrivateData::PrivateData(Application& a, Window* const s)
       usesScheduledRepaints(false),
       usesSizeRequest(false),
       scaleFactor(DGL_NAMESPACE::getScaleFactor(view)),
-     #if DGL_ALLOW_DEPRECATED_METHODS
       autoScaling(false),
       autoScaleFactor(1.0),
-     #endif
       minWidth(0),
       minHeight(0),
       keepAspectRatio(false),
@@ -151,10 +149,8 @@ Window::PrivateData::PrivateData(Application& a, Window* const s, PrivateData* c
       usesScheduledRepaints(false),
       usesSizeRequest(false),
       scaleFactor(ppData->scaleFactor),
-     #if DGL_ALLOW_DEPRECATED_METHODS
       autoScaling(false),
       autoScaleFactor(1.0),
-     #endif
       minWidth(0),
       minHeight(0),
       keepAspectRatio(false),
@@ -188,10 +184,8 @@ Window::PrivateData::PrivateData(Application& a, Window* const s,
       usesScheduledRepaints(false),
       usesSizeRequest(false),
       scaleFactor(scale != 0.0 ? scale : DGL_NAMESPACE::getScaleFactor(view)),
-     #if DGL_ALLOW_DEPRECATED_METHODS
       autoScaling(false),
       autoScaleFactor(1.0),
-     #endif
       minWidth(0),
       minHeight(0),
       keepAspectRatio(false),
@@ -228,10 +222,8 @@ Window::PrivateData::PrivateData(Application& a, Window* const s,
       usesScheduledRepaints(_usesScheduledRepaints),
       usesSizeRequest(_usesSizeRequest),
       scaleFactor(scale != 0.0 ? scale : DGL_NAMESPACE::getScaleFactor(view)),
-     #if DGL_ALLOW_DEPRECATED_METHODS
       autoScaling(false),
       autoScaleFactor(1.0),
-     #endif
       minWidth(0),
       minHeight(0),
       keepAspectRatio(false),
@@ -660,7 +652,6 @@ void Window::PrivateData::onPuglConfigure(const uint width, const uint height)
 
     createContextIfNeeded();
 
-   #if DGL_ALLOW_DEPRECATED_METHODS
     if (autoScaling)
     {
         const double scaleHorizontal = width  / static_cast<double>(minWidth);
@@ -671,12 +662,9 @@ void Window::PrivateData::onPuglConfigure(const uint width, const uint height)
     {
         autoScaleFactor = 1.0;
     }
+
     const uint uwidth = d_roundToUnsignedInt(width / autoScaleFactor);
     const uint uheight = d_roundToUnsignedInt(height / autoScaleFactor);
-   #else
-    const uint uwidth = width;
-    const uint uheight = height;
-   #endif
 
    #ifdef DGL_USE_WEB_VIEW
     if (webViewHandle != nullptr)

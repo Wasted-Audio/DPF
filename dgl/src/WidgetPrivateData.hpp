@@ -42,12 +42,7 @@ struct Widget::PrivateData {
     explicit PrivateData(Widget* const s, Widget* const pw);
     ~PrivateData();
 
-    void displaySubWidgets(uint width,
-                           uint height
-                          #if DGL_ALLOW_DEPRECATED_METHODS
-                           , double autoScaleFactor
-                          #endif
-                           );
+    void displaySubWidgets(uint width, uint height, double autoScaleFactor);
 
     bool giveKeyboardEventForSubWidgets(const KeyboardEvent& ev);
     bool giveCharacterInputEventForSubWidgets(const CharacterInputEvent& ev);

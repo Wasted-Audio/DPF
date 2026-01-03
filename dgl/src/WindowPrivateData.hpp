@@ -73,11 +73,9 @@ struct Window::PrivateData : IdleCallback {
     /** Scale factor to report to widgets on request, purely informational. */
     double scaleFactor;
 
-   #if DGL_ALLOW_DEPRECATED_METHODS
     /** Automatic scaling to apply on widgets, implemented internally. */
     bool autoScaling;
     double autoScaleFactor;
-   #endif
 
     /** Pugl geometry constraints access. */
     uint minWidth, minHeight;

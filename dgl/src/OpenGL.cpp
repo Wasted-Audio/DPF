@@ -157,11 +157,7 @@ OpenGLImage::OpenGLImage(const char* const rdata, const Size<uint>& s, const GLe
 
 // --------------------------------------------------------------------------------------------------------------------
 
-void SubWidget::PrivateData::display(const uint width, const uint height
-                                    #if DGL_ALLOW_DEPRECATED_METHODS
-                                     , const double autoScaleFactor
-                                    #endif
-                                     )
+void SubWidget::PrivateData::display(const uint width, const uint height, const double autoScaleFactor)
 {
     if (skipDrawing)
         return;
@@ -195,7 +191,6 @@ void SubWidget::PrivateData::display(const uint width, const uint height
     }
     else
     {
-       #if DGL_ALLOW_DEPRECATED_METHODS
         // set viewport pos
         glViewport(d_roundToIntPositive(absolutePos.getX() * autoScaleFactor),
                    -d_roundToIntPositive(absolutePos.getY() * autoScaleFactor),
@@ -207,16 +202,6 @@ void SubWidget::PrivateData::display(const uint width, const uint height
                   d_roundToIntPositive(height - (static_cast<int>(self->getHeight()) + absolutePos.getY()) * autoScaleFactor),
                   d_roundToIntPositive(self->getWidth() * autoScaleFactor),
                   d_roundToIntPositive(self->getHeight() * autoScaleFactor));
-       #else
-        // set viewport pos
-        glViewport(absolutePos.getX(), -absolutePos.getY(), static_cast<int>(width), static_cast<int>(height));
-
-        // then cut the outer bounds
-        glScissor(absolutePos.getX(),
-                  static_cast<int>(height) - self->getHeight() + absolutePos.getY(),
-                  static_cast<int>(self->getWidth()),
-                  static_cast<int>(self->getHeight()));
-       #endif
 
         glEnable(GL_SCISSOR_TEST);
         needsDisableScissor = true;
@@ -228,11 +213,7 @@ void SubWidget::PrivateData::display(const uint width, const uint height
     if (needsDisableScissor)
         glDisable(GL_SCISSOR_TEST);
 
-   #if DGL_ALLOW_DEPRECATED_METHODS
     selfw->pData->displaySubWidgets(width, height, autoScaleFactor);
-   #else
-    selfw->pData->displaySubWidgets(width, height);
-   #endif
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -253,11 +234,7 @@ void TopLevelWidget::PrivateData::display()
     self->onDisplay();
 
     // now draw subwidgets if there are any
-    selfw->pData->displaySubWidgets(width, height
-                                   #if DGL_ALLOW_DEPRECATED_METHODS
-                                    , window.pData->autoScaleFactor
-                                   #endif
-                                    );
+    selfw->pData->displaySubWidgets(width, height, window.pData->autoScaleFactor);
 }
 
 // --------------------------------------------------------------------------------------------------------------------

@@ -172,15 +172,9 @@ void Rectangle<T>::drawOutline()
 
 // --------------------------------------------------------------------------------------------------------------------
 
-#if DGL_ALLOW_DEPRECATED_METHODS
 void SubWidget::PrivateData::display(uint, uint, double)
 {
 }
-#else
-void SubWidget::PrivateData::display(uint, uint)
-{
-}
-#endif
 
 // --------------------------------------------------------------------------------------------------------------------
 

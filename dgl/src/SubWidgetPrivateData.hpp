@@ -38,11 +38,7 @@ struct SubWidget::PrivateData {
     ~PrivateData();
 
     // NOTE display function is different depending on build type, must call displaySubWidgets at the end
-   #if DGL_ALLOW_DEPRECATED_METHODS
     void display(uint width, uint height, double autoScaleFactor);
-   #else
-    void display(uint width, uint height);
-   #endif
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PrivateData)
 };
