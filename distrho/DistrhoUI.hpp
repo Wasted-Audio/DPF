@@ -72,6 +72,11 @@ class PluginWindow;
 class UI : public UIWidget
 {
 public:
+    enum InternalScalingMode {
+        kNoInternalScaling,
+        kInternalScalingMatchingHost,
+    };
+
    /**
       UI class constructor.
       The UI should be initialized to a default state that matches the plugin side.
@@ -82,7 +87,7 @@ public:
       @see getScaleFactor
       @see setGeometryConstraints
     */
-    UI(uint width = 0, uint height = 0);
+    UI(uint width = 0, uint height = 0, InternalScalingMode internalScalingMode = kNoInternalScaling);
 
    #if DGL_ALLOW_DEPRECATED_METHODS
    /** DEPRECATED DO NOT USE.

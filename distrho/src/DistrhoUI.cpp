@@ -180,7 +180,7 @@ PluginWindow& UI::PrivateData::createNextWindow(UI* const ui, uint width, uint h
     UI::PrivateData* const uiData = s_nextPrivateData;
     const double scaleFactor = d_isNotZero(uiData->scaleFactor) ? uiData->scaleFactor : getDesktopScaleFactor(uiData->winId);
 
-    if (d_isNotZero(scaleFactor) && d_isNotEqual(scaleFactor, 1.0))
+    if (d_isNotEqual(scaleFactor, 1.0))
     {
         width *= scaleFactor;
         height *= scaleFactor;
@@ -322,7 +322,7 @@ void UI::PrivateData::webViewMessageCallback(void* const arg, char* const msg)
 /* ------------------------------------------------------------------------------------------------------------
  * UI */
 
-UI::UI(const uint width, const uint height)
+UI::UI(const uint width, const uint height, const InternalScalingMode internalScalingMode)
     : UIWidget(UI::PrivateData::createNextWindow(this,
                // width
               #ifdef DISTRHO_UI_DEFAULT_WIDTH
@@ -339,14 +339,15 @@ UI::UI(const uint width, const uint height)
 {
     if (width != 0 && height != 0)
     {
-        Widget::setSize(width, height);
+        if (internalScalingMode == kInternalScalingMatchingHost)
+        {
+            d_stdout("enableInternalScalingWithSize %u %u", width, height);
+            getWindow().enableInternalScalingWithSize(width, height, true);
+            return;
+        }
     }
-   #ifdef DISTRHO_UI_DEFAULT_WIDTH
-    else
-    {
-        Widget::setSize(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT);
-    }
-   #endif
+
+    Widget::setSize(getWindow().getSize());
 }
 
 #if DGL_ALLOW_DEPRECATED_METHODS
