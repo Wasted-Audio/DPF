@@ -382,7 +382,7 @@ UI::UI(const uint width, const uint height, const bool automaticallyScaleAndSetA
             #pragma GCC diagnostic push
             #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
            #endif
-            setGeometryConstraints(width, height, true, true, true);
+            setGeometryConstraints(width, height, true, true, false);
            #if defined(_MSC_VER)
             #pragma warning(pop)
            #elif defined(__clang__)

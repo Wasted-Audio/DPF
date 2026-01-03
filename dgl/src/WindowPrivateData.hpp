@@ -76,10 +76,7 @@ struct Window::PrivateData : IdleCallback {
     /** Automatic scaling to apply on widgets, implemented internally. */
     bool autoScaling;
     double autoScaleFactor;
-
-    /** Pugl geometry constraints access. */
-    uint minWidth, minHeight;
-    bool keepAspectRatio;
+    uint baseWidth, baseHeight;
 
     /** Whether to ignore idle callback requests, useful for temporary windows. */
     bool ignoreIdleCallbacks;

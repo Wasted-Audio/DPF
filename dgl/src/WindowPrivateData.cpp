@@ -118,9 +118,8 @@ Window::PrivateData::PrivateData(Application& a, Window* const s)
       scaleFactor(DGL_NAMESPACE::getScaleFactor(view)),
       autoScaling(false),
       autoScaleFactor(1.0),
-      minWidth(0),
-      minHeight(0),
-      keepAspectRatio(false),
+      baseWidth(0),
+      baseHeight(0),
       ignoreIdleCallbacks(false),
       waitingForClipboardData(false),
       waitingForClipboardEvents(false),
@@ -151,9 +150,8 @@ Window::PrivateData::PrivateData(Application& a, Window* const s, PrivateData* c
       scaleFactor(ppData->scaleFactor),
       autoScaling(false),
       autoScaleFactor(1.0),
-      minWidth(0),
-      minHeight(0),
-      keepAspectRatio(false),
+      baseWidth(0),
+      baseHeight(0),
       ignoreIdleCallbacks(false),
       waitingForClipboardData(false),
       waitingForClipboardEvents(false),
@@ -186,9 +184,8 @@ Window::PrivateData::PrivateData(Application& a, Window* const s,
       scaleFactor(scale != 0.0 ? scale : DGL_NAMESPACE::getScaleFactor(view)),
       autoScaling(false),
       autoScaleFactor(1.0),
-      minWidth(0),
-      minHeight(0),
-      keepAspectRatio(false),
+      baseWidth(0),
+      baseHeight(0),
       ignoreIdleCallbacks(false),
       waitingForClipboardData(false),
       waitingForClipboardEvents(false),
@@ -224,9 +221,8 @@ Window::PrivateData::PrivateData(Application& a, Window* const s,
       scaleFactor(scale != 0.0 ? scale : DGL_NAMESPACE::getScaleFactor(view)),
       autoScaling(false),
       autoScaleFactor(1.0),
-      minWidth(0),
-      minHeight(0),
-      keepAspectRatio(false),
+      baseWidth(0),
+      baseHeight(0),
       ignoreIdleCallbacks(false),
       waitingForClipboardData(false),
       waitingForClipboardEvents(false),
@@ -654,8 +650,8 @@ void Window::PrivateData::onPuglConfigure(const uint width, const uint height)
 
     if (autoScaling)
     {
-        const double scaleHorizontal = width  / static_cast<double>(minWidth);
-        const double scaleVertical   = height / static_cast<double>(minHeight);
+        const double scaleHorizontal = width  / static_cast<double>(baseWidth);
+        const double scaleVertical   = height / static_cast<double>(baseHeight);
         autoScaleFactor = scaleHorizontal < scaleVertical ? scaleHorizontal : scaleVertical;
     }
     else

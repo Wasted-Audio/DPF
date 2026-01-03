@@ -274,28 +274,27 @@ void Window::setSize(uint width, uint height)
 
     if (pData->isEmbed)
     {
-        uint minWidth = pData->minWidth;
-        uint minHeight = pData->minHeight;
+        PuglArea area = puglGetSizeHint(pData->view, PUGL_FIXED_ASPECT);
 
         if (pData->autoScaling && d_isNotEqual(scaleFactor, 1.0))
         {
-            minWidth = d_roundToUnsignedInt(minWidth * scaleFactor);
-            minHeight = d_roundToUnsignedInt(minHeight * scaleFactor);
+            area.width = d_roundToUnsignedInt(area.width * scaleFactor);
+            area.height = d_roundToUnsignedInt(area.height * scaleFactor);
             width = d_roundToUnsignedInt(width * scaleFactor);
             height = d_roundToUnsignedInt(height * scaleFactor);
         }
 
         // handle geometry constraints here
-        if (width < minWidth)
-            width = minWidth;
+        if (width < area.width)
+            width = area.width;
 
-        if (height < minHeight)
-            height = minHeight;
+        if (height < area.height)
+            height = area.height;
 
-        if (pData->keepAspectRatio)
+        if (area.width != 0 && area.height != 0)
         {
-            const double ratio = static_cast<double>(pData->minWidth)
-                               / static_cast<double>(pData->minHeight);
+            const double ratio = static_cast<double>(area.width)
+                               / static_cast<double>(area.height);
             const double reqRatio = static_cast<double>(width)
                                   / static_cast<double>(height);
 
@@ -432,11 +431,10 @@ void Window::enableInternalScalingWithSize(uint baseWidth, uint baseHeight, cons
     const double scaleHorizontal = size.getWidth() / static_cast<double>(baseWidth);
     const double scaleVertical = size.getHeight() / static_cast<double>(baseHeight);
 
-    pData->minWidth = baseWidth;
-    pData->minHeight = baseHeight;
+    pData->baseWidth = baseWidth;
+    pData->baseHeight = baseHeight;
     pData->autoScaling = true;
     pData->autoScaleFactor = scaleHorizontal < scaleVertical ? scaleHorizontal : scaleVertical;
-    pData->keepAspectRatio = keepAspectRatio;
 
     if (pData->view == nullptr)
         return;
@@ -527,18 +525,15 @@ void Window::runAsModal(bool blockWait)
 
 Size<uint> Window::getGeometryConstraints(bool& keepAspectRatio)
 {
-    keepAspectRatio = pData->keepAspectRatio;
-    return Size<uint>(pData->minWidth, pData->minHeight);
+    const PuglArea area = puglGetSizeHint(pData->view, PUGL_FIXED_ASPECT);
+    keepAspectRatio = area.width != 0 && area.height != 0;
+    return Size<uint>(area.width, area.height);
 }
 
 void Window::setGeometryConstraints(const uint minimumWidth, const uint minimumHeight, const bool keepAspectRatio)
 {
     DISTRHO_SAFE_ASSERT_RETURN(minimumWidth > 0,);
     DISTRHO_SAFE_ASSERT_RETURN(minimumHeight > 0,);
-
-    pData->minWidth = minimumWidth;
-    pData->minHeight = minimumHeight;
-    pData->keepAspectRatio = keepAspectRatio;
 
     if (pData->view != nullptr)
         puglSetGeometryConstraints(pData->view, minimumWidth, minimumHeight, keepAspectRatio);
@@ -558,10 +553,18 @@ void Window::setGeometryConstraints(uint minimumWidth,
     if (resizeNowIfAutoScaling && automaticallyScale && pData->autoScaling == automaticallyScale)
         resizeNowIfAutoScaling = false;
 
-    pData->minWidth = minimumWidth;
-    pData->minHeight = minimumHeight;
-    pData->autoScaling = automaticallyScale;
-    pData->keepAspectRatio = keepAspectRatio;
+    if (automaticallyScale)
+    {
+        pData->autoScaling = true;
+        pData->baseWidth = minimumWidth;
+        pData->baseHeight = minimumHeight;
+    }
+    else
+    {
+        pData->autoScaling = false;
+        pData->baseWidth = 0;
+        pData->baseHeight = 0;
+    }
 
     if (pData->view == nullptr)
         return;
