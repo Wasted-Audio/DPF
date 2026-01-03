@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2025 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2026 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -235,11 +235,19 @@ VulkanImage& VulkanImage::operator=(const VulkanImage& image) noexcept
 
 // -----------------------------------------------------------------------
 
-void SubWidget::PrivateData::display(const uint width, const uint height, const double autoScaleFactor)
+void SubWidget::PrivateData::display(const uint width, const uint height
+                                    #if DGL_ALLOW_DEPRECATED_METHODS
+                                     , const double autoScaleFactor
+                                    #endif
+                                     )
 {
     // TODO
 
+   #if DGL_ALLOW_DEPRECATED_METHODS
     selfw->pData->displaySubWidgets(width, height, autoScaleFactor);
+   #else
+    selfw->pData->displaySubWidgets(width, height);
+   #endif
 }
 
 // -----------------------------------------------------------------------
@@ -253,15 +261,17 @@ void TopLevelWidget::PrivateData::display()
     const uint width  = size.getWidth();
     const uint height = size.getHeight();
 
-    const double autoScaleFactor = window.pData->autoScaleFactor;
-
     // TODO
 
     // main widget drawing
     self->onDisplay();
 
     // now draw subwidgets if there are any
-    selfw->pData->displaySubWidgets(width, height, autoScaleFactor);
+    selfw->pData->displaySubWidgets(width, height
+                                   #if DGL_ALLOW_DEPRECATED_METHODS
+                                    , window.pData->autoScaleFactor
+                                   #endif
+                                    );
 }
 
 // -----------------------------------------------------------------------

@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2025 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2026 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -272,15 +272,18 @@ void Window::setSize(uint width, uint height)
 
     if (pData->isEmbed)
     {
-        const double scaleFactor = pData->scaleFactor;
         uint minWidth = pData->minWidth;
         uint minHeight = pData->minHeight;
+
+       #if DGL_ALLOW_DEPRECATED_METHODS
+        const double scaleFactor = pData->scaleFactor;
 
         if (pData->autoScaling && d_isNotEqual(scaleFactor, 1.0))
         {
             minWidth = d_roundToUnsignedInt(minWidth * scaleFactor);
             minHeight = d_roundToUnsignedInt(minHeight * scaleFactor);
         }
+       #endif
 
         // handle geometry constraints here
         if (width < minWidth)
@@ -462,6 +465,7 @@ void Window::repaint(const Rectangle<uint>& rect) noexcept
     uint width = rect.getWidth();
     uint height = rect.getHeight();
 
+   #if DGL_ALLOW_DEPRECATED_METHODS
     if (pData->autoScaling)
     {
         const double autoScaleFactor = pData->autoScaleFactor;
@@ -471,6 +475,7 @@ void Window::repaint(const Rectangle<uint>& rect) noexcept
         width = d_roundToUnsignedInt(width * autoScaleFactor);
         height = d_roundToUnsignedInt(height * autoScaleFactor);
     }
+   #endif
 
     puglObscureRegion(pData->view, x, y, width, height);
 }
@@ -491,6 +496,20 @@ Size<uint> Window::getGeometryConstraints(bool& keepAspectRatio)
     return Size<uint>(pData->minWidth, pData->minHeight);
 }
 
+void Window::setGeometryConstraints(const uint minimumWidth, const uint minimumHeight, const bool keepAspectRatio)
+{
+    DISTRHO_SAFE_ASSERT_RETURN(minimumWidth > 0,);
+    DISTRHO_SAFE_ASSERT_RETURN(minimumHeight > 0,);
+
+    pData->minWidth = minimumWidth;
+    pData->minHeight = minimumHeight;
+    pData->keepAspectRatio = keepAspectRatio;
+
+    if (pData->view != nullptr)
+        puglSetGeometryConstraints(pData->view, minimumWidth, minimumHeight, keepAspectRatio);
+}
+
+#if DGL_ALLOW_DEPRECATED_METHODS
 void Window::setGeometryConstraints(uint minimumWidth,
                                     uint minimumHeight,
                                     const bool keepAspectRatio,
@@ -530,6 +549,7 @@ void Window::setGeometryConstraints(uint minimumWidth,
                 d_roundToUnsignedInt(size.getHeight() * scaleFactor));
     }
 }
+#endif
 
 void Window::setTransientParent(const uintptr_t transientParentWindowHandle)
 {

@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2022 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2026 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -31,8 +31,9 @@ ImageBaseAboutWindow<ImageType>::ImageBaseAboutWindow(Window& transientParentWin
 
     if (image.isValid())
     {
-        setSize(image.getSize());
-        setGeometryConstraints(image.getWidth(), image.getHeight(), true, true);
+        const double scaleFactor = getScaleFactor();
+        setSize(image.getSize() * scaleFactor);
+        setGeometryConstraints(image.getWidth() * scaleFactor, image.getHeight() * scaleFactor, true);
     }
 
     done();
@@ -48,8 +49,9 @@ ImageBaseAboutWindow<ImageType>::ImageBaseAboutWindow(TopLevelWidget* const topL
 
     if (image.isValid())
     {
-        setSize(image.getSize());
-        setGeometryConstraints(image.getWidth(), image.getHeight(), true, true);
+        const double scaleFactor = getScaleFactor();
+        setSize(image.getSize() * scaleFactor);
+        setGeometryConstraints(image.getWidth(), image.getHeight(), true);
     }
 
     done();
@@ -71,8 +73,9 @@ void ImageBaseAboutWindow<ImageType>::setImage(const ImageType& image)
 
     img = image;
 
-    setSize(image.getSize());
-    setGeometryConstraints(image.getWidth(), image.getHeight(), true, true);
+    const double scaleFactor = getScaleFactor();
+    setSize(image.getSize() * scaleFactor);
+    setGeometryConstraints(image.getWidth() * scaleFactor, image.getHeight() * scaleFactor, true);
 
     done();
 }

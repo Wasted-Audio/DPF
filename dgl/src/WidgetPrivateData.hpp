@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2022 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2026 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -42,7 +42,12 @@ struct Widget::PrivateData {
     explicit PrivateData(Widget* const s, Widget* const pw);
     ~PrivateData();
 
-    void displaySubWidgets(uint width, uint height, double autoScaleFactor);
+    void displaySubWidgets(uint width,
+                           uint height
+                          #if DGL_ALLOW_DEPRECATED_METHODS
+                           , double autoScaleFactor
+                          #endif
+                           );
 
     bool giveKeyboardEventForSubWidgets(const KeyboardEvent& ev);
     bool giveCharacterInputEventForSubWidgets(const CharacterInputEvent& ev);

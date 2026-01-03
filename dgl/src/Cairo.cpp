@@ -1,7 +1,7 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2025 Filipe Coelho <falktx@falktx.com>
  * Copyright (C) 2019-2021 Jean Pierre Cimalando <jp-dev@inbox.ru>
+ * Copyright (C) 2012-2026 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -736,7 +736,11 @@ template class ImageBaseSwitch<CairoImage>;
 
 // -----------------------------------------------------------------------
 
-void SubWidget::PrivateData::display(const uint width, const uint height, const double autoScaleFactor)
+void SubWidget::PrivateData::display(const uint width, const uint height
+                                    #if DGL_ALLOW_DEPRECATED_METHODS
+                                     , const double autoScaleFactor
+                                    #endif
+                                     )
 {
     cairo_t* const handle = static_cast<const CairoGraphicsContext&>(self->getGraphicsContext()).handle;
 
@@ -754,10 +758,13 @@ void SubWidget::PrivateData::display(const uint width, const uint height, const 
     {
         // full viewport size
         cairo_translate(handle, 0, 0);
+       #if DGL_ALLOW_DEPRECATED_METHODS
         cairo_scale(handle, autoScaleFactor, autoScaleFactor);
+       #endif
     }
     else
     {
+       #if DGL_ALLOW_DEPRECATED_METHODS
         // set viewport pos
         cairo_translate(handle, absolutePos.getX() * autoScaleFactor, absolutePos.getY() * autoScaleFactor);
 
@@ -767,12 +774,21 @@ void SubWidget::PrivateData::display(const uint width, const uint height, const 
                         0,
                         std::round(self->getWidth() * autoScaleFactor),
                         std::round(self->getHeight() * autoScaleFactor));
+       #else
+        // set viewport pos
+        cairo_translate(handle, absolutePos.getX(), absolutePos.getY());
+
+        // then cut the outer bounds
+        cairo_rectangle(handle, 0, 0, self->getWidth(), self->getHeight());
+       #endif
 
         cairo_clip(handle);
         needsResetClip = true;
 
+       #if DGL_ALLOW_DEPRECATED_METHODS
         // set viewport scaling
         cairo_scale(handle, autoScaleFactor, autoScaleFactor);
+       #endif
     }
 
     // display widget
@@ -783,7 +799,11 @@ void SubWidget::PrivateData::display(const uint width, const uint height, const 
 
     cairo_set_matrix(handle, &matrix);
 
+   #if DGL_ALLOW_DEPRECATED_METHODS
     selfw->pData->displaySubWidgets(width, height, autoScaleFactor);
+   #else
+    selfw->pData->displaySubWidgets(width, height);
+   #endif
 }
 
 // -----------------------------------------------------------------------
@@ -799,7 +819,9 @@ void TopLevelWidget::PrivateData::display()
     const uint width  = size.getWidth();
     const uint height = size.getHeight();
 
+   #if DGL_ALLOW_DEPRECATED_METHODS
     const double autoScaleFactor = window.pData->autoScaleFactor;
+   #endif
 
     cairo_matrix_t matrix;
     cairo_get_matrix(handle, &matrix);
@@ -807,10 +829,12 @@ void TopLevelWidget::PrivateData::display()
     // full viewport size
     cairo_translate(handle, 0, 0);
 
+   #if DGL_ALLOW_DEPRECATED_METHODS
     if (window.pData->autoScaling)
         cairo_scale(handle, autoScaleFactor, autoScaleFactor);
     else
         cairo_scale(handle, 1.0, 1.0);
+   #endif
 
     // main widget drawing
     self->onDisplay();
@@ -818,7 +842,11 @@ void TopLevelWidget::PrivateData::display()
     cairo_set_matrix(handle, &matrix);
 
     // now draw subwidgets if there are any
-    selfw->pData->displaySubWidgets(width, height, autoScaleFactor);
+    selfw->pData->displaySubWidgets(width, height
+                                   #if DGL_ALLOW_DEPRECATED_METHODS
+                                    , autoScaleFactor
+                                   #endif
+                                    );
 }
 
 // -----------------------------------------------------------------------

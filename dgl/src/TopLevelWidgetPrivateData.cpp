@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2021 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2026 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -75,6 +75,7 @@ bool TopLevelWidget::PrivateData::mouseEvent(const MouseEvent& ev)
 
     MouseEvent rev = ev;
 
+   #if DGL_ALLOW_DEPRECATED_METHODS
     if (window.pData->autoScaling)
     {
         const double autoScaleFactor = window.pData->autoScaleFactor;
@@ -84,6 +85,7 @@ bool TopLevelWidget::PrivateData::mouseEvent(const MouseEvent& ev)
         rev.absolutePos.setX(ev.absolutePos.getX() / autoScaleFactor);
         rev.absolutePos.setY(ev.absolutePos.getY() / autoScaleFactor);
     }
+   #endif
 
     // propagate event to all subwidgets recursively
     return selfw->pData->giveMouseEventForSubWidgets(rev);
@@ -97,6 +99,7 @@ bool TopLevelWidget::PrivateData::motionEvent(const MotionEvent& ev)
 
     MotionEvent rev = ev;
 
+   #if DGL_ALLOW_DEPRECATED_METHODS
     if (window.pData->autoScaling)
     {
         const double autoScaleFactor = window.pData->autoScaleFactor;
@@ -106,6 +109,7 @@ bool TopLevelWidget::PrivateData::motionEvent(const MotionEvent& ev)
         rev.absolutePos.setX(ev.absolutePos.getX() / autoScaleFactor);
         rev.absolutePos.setY(ev.absolutePos.getY() / autoScaleFactor);
     }
+   #endif
 
     // propagate event to all subwidgets recursively
     return selfw->pData->giveMotionEventForSubWidgets(rev);
@@ -119,6 +123,7 @@ bool TopLevelWidget::PrivateData::scrollEvent(const ScrollEvent& ev)
 
     ScrollEvent rev = ev;
 
+   #if DGL_ALLOW_DEPRECATED_METHODS
     if (window.pData->autoScaling)
     {
         const double autoScaleFactor = window.pData->autoScaleFactor;
@@ -130,6 +135,7 @@ bool TopLevelWidget::PrivateData::scrollEvent(const ScrollEvent& ev)
         rev.delta.setX(ev.delta.getX() / autoScaleFactor);
         rev.delta.setY(ev.delta.getY() / autoScaleFactor);
     }
+   #endif
 
     // propagate event to all subwidgets recursively
     return selfw->pData->giveScrollEventForSubWidgets(rev);

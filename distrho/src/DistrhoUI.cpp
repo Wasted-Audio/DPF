@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2024 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2026 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -322,6 +322,34 @@ void UI::PrivateData::webViewMessageCallback(void* const arg, char* const msg)
 /* ------------------------------------------------------------------------------------------------------------
  * UI */
 
+UI::UI(const uint width, const uint height)
+    : UIWidget(UI::PrivateData::createNextWindow(this,
+               // width
+              #ifdef DISTRHO_UI_DEFAULT_WIDTH
+               width == 0 ? DISTRHO_UI_DEFAULT_WIDTH :
+              #endif
+               width,
+               // height
+              #ifdef DISTRHO_UI_DEFAULT_HEIGHT
+               height == 0 ? DISTRHO_UI_DEFAULT_HEIGHT :
+              #endif
+               height
+               )),
+      uiData(UI::PrivateData::s_nextPrivateData)
+{
+    if (width != 0 && height != 0)
+    {
+        Widget::setSize(width, height);
+    }
+   #ifdef DISTRHO_UI_DEFAULT_WIDTH
+    else
+    {
+        Widget::setSize(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT);
+    }
+   #endif
+}
+
+#if DGL_ALLOW_DEPRECATED_METHODS
 UI::UI(const uint width, const uint height, const bool automaticallyScaleAndSetAsMinimumSize)
     : UIWidget(UI::PrivateData::createNextWindow(this,
                // width
@@ -342,7 +370,26 @@ UI::UI(const uint width, const uint height, const bool automaticallyScaleAndSetA
         Widget::setSize(width, height);
 
         if (automaticallyScaleAndSetAsMinimumSize)
+        {
+           #if defined(_MSC_VER)
+            #pragma warning(push)
+            #pragma warning(disable:4996)
+           #elif defined(__clang__)
+            #pragma clang diagnostic push
+            #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+           #elif defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__) >= 460
+            #pragma GCC diagnostic push
+            #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+           #endif
             setGeometryConstraints(width, height, true, true, true);
+           #if defined(_MSC_VER)
+            #pragma warning(pop)
+           #elif defined(__clang__)
+            #pragma clang diagnostic pop
+           #elif defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__) >= 460
+            #pragma GCC diagnostic pop
+           #endif
+        }
     }
    #ifdef DISTRHO_UI_DEFAULT_WIDTH
     else
@@ -351,6 +398,7 @@ UI::UI(const uint width, const uint height, const bool automaticallyScaleAndSetA
     }
    #endif
 }
+#endif
 
 UI::~UI()
 {

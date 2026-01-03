@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2025 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2026 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -73,9 +73,11 @@ struct Window::PrivateData : IdleCallback {
     /** Scale factor to report to widgets on request, purely informational. */
     double scaleFactor;
 
+   #if DGL_ALLOW_DEPRECATED_METHODS
     /** Automatic scaling to apply on widgets, implemented internally. */
     bool autoScaling;
     double autoScaleFactor;
+   #endif
 
     /** Pugl geometry constraints access. */
     uint minWidth, minHeight;

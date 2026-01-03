@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2025 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2026 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -116,8 +116,10 @@ Window::PrivateData::PrivateData(Application& a, Window* const s)
       usesScheduledRepaints(false),
       usesSizeRequest(false),
       scaleFactor(DGL_NAMESPACE::getScaleFactor(view)),
+     #if DGL_ALLOW_DEPRECATED_METHODS
       autoScaling(false),
       autoScaleFactor(1.0),
+     #endif
       minWidth(0),
       minHeight(0),
       keepAspectRatio(false),
@@ -149,8 +151,10 @@ Window::PrivateData::PrivateData(Application& a, Window* const s, PrivateData* c
       usesScheduledRepaints(false),
       usesSizeRequest(false),
       scaleFactor(ppData->scaleFactor),
+     #if DGL_ALLOW_DEPRECATED_METHODS
       autoScaling(false),
       autoScaleFactor(1.0),
+     #endif
       minWidth(0),
       minHeight(0),
       keepAspectRatio(false),
@@ -184,8 +188,10 @@ Window::PrivateData::PrivateData(Application& a, Window* const s,
       usesScheduledRepaints(false),
       usesSizeRequest(false),
       scaleFactor(scale != 0.0 ? scale : DGL_NAMESPACE::getScaleFactor(view)),
+     #if DGL_ALLOW_DEPRECATED_METHODS
       autoScaling(false),
       autoScaleFactor(1.0),
+     #endif
       minWidth(0),
       minHeight(0),
       keepAspectRatio(false),
@@ -222,8 +228,10 @@ Window::PrivateData::PrivateData(Application& a, Window* const s,
       usesScheduledRepaints(_usesScheduledRepaints),
       usesSizeRequest(_usesSizeRequest),
       scaleFactor(scale != 0.0 ? scale : DGL_NAMESPACE::getScaleFactor(view)),
+     #if DGL_ALLOW_DEPRECATED_METHODS
       autoScaling(false),
       autoScaleFactor(1.0),
+     #endif
       minWidth(0),
       minHeight(0),
       keepAspectRatio(false),
@@ -526,7 +534,10 @@ bool Window::PrivateData::openFileBrowser(const FileBrowserOptions& options)
 
     fileBrowserHandle = fileBrowserCreate(isEmbed,
                                           puglGetNativeView(view),
-                                          autoScaling ? autoScaleFactor : scaleFactor,
+                                         #if DGL_ALLOW_DEPRECATED_METHODS
+                                          autoScaling ? autoScaleFactor :
+                                         #endif
+                                          scaleFactor,
                                           options2);
 
     return fileBrowserHandle != nullptr;
@@ -552,7 +563,10 @@ bool Window::PrivateData::createWebView(const char* const url, const DGL_NAMESPA
                                   puglGetNativeView(view),
                                   initialWidth,
                                   initialHeight,
-                                  autoScaling ? autoScaleFactor : scaleFactor,
+                                 #if DGL_ALLOW_DEPRECATED_METHODS
+                                  autoScaling ? autoScaleFactor :
+                                 #endif
+                                  scaleFactor,
                                   options);
 
     return webViewHandle != nullptr;
@@ -646,6 +660,7 @@ void Window::PrivateData::onPuglConfigure(const uint width, const uint height)
 
     createContextIfNeeded();
 
+   #if DGL_ALLOW_DEPRECATED_METHODS
     if (autoScaling)
     {
         const double scaleHorizontal = width  / static_cast<double>(minWidth);
@@ -656,16 +671,22 @@ void Window::PrivateData::onPuglConfigure(const uint width, const uint height)
     {
         autoScaleFactor = 1.0;
     }
-
     const uint uwidth = d_roundToUnsignedInt(width / autoScaleFactor);
     const uint uheight = d_roundToUnsignedInt(height / autoScaleFactor);
+   #else
+    const uint uwidth = width;
+    const uint uheight = height;
+   #endif
 
    #ifdef DGL_USE_WEB_VIEW
     if (webViewHandle != nullptr)
         webViewResize(webViewHandle,
                       uwidth - webViewOffset.getX(),
                       uheight - webViewOffset.getY(),
-                      autoScaling ? autoScaleFactor : scaleFactor);
+                     #if DGL_ALLOW_DEPRECATED_METHODS
+                      autoScaling ? autoScaleFactor :
+                     #endif
+                      scaleFactor);
    #endif
 
   #if DGL_ALLOW_DEPRECATED_METHODS
@@ -1089,12 +1110,14 @@ PuglStatus Window::PrivateData::puglEventCallback(PuglView* const view, const Pu
         ev.time   = d_roundToUnsignedInt(event->button.time * 1000.0);
         ev.button = event->button.button + 1;
         ev.press  = event->type == PUGL_BUTTON_PRESS;
+       #if DGL_ALLOW_DEPRECATED_METHODS
         if (pData->autoScaling && 0)
         {
             const double scaleFactor = pData->autoScaleFactor;
             ev.pos = Point<double>(event->button.x / scaleFactor, event->button.y / scaleFactor);
         }
         else
+       #endif
         {
             ev.pos = Point<double>(event->button.x, event->button.y);
         }
@@ -1110,12 +1133,14 @@ PuglStatus Window::PrivateData::puglEventCallback(PuglView* const view, const Pu
         ev.mod   = event->motion.state;
         ev.flags = event->motion.flags;
         ev.time  = d_roundToUnsignedInt(event->motion.time * 1000.0);
+       #if DGL_ALLOW_DEPRECATED_METHODS
         if (pData->autoScaling && 0)
         {
             const double scaleFactor = pData->autoScaleFactor;
             ev.pos = Point<double>(event->motion.x / scaleFactor, event->motion.y / scaleFactor);
         }
         else
+       #endif
         {
             ev.pos = Point<double>(event->motion.x, event->motion.y);
         }
@@ -1131,6 +1156,7 @@ PuglStatus Window::PrivateData::puglEventCallback(PuglView* const view, const Pu
         ev.mod       = event->scroll.state;
         ev.flags     = event->scroll.flags;
         ev.time      = d_roundToUnsignedInt(event->scroll.time * 1000.0);
+       #if DGL_ALLOW_DEPRECATED_METHODS
         if (pData->autoScaling && 0)
         {
             const double scaleFactor = pData->autoScaleFactor;
@@ -1138,6 +1164,7 @@ PuglStatus Window::PrivateData::puglEventCallback(PuglView* const view, const Pu
             ev.delta = Point<double>(event->scroll.dx / scaleFactor, event->scroll.dy / scaleFactor);
         }
         else
+       #endif
         {
             ev.pos   = Point<double>(event->scroll.x, event->scroll.y);
             ev.delta = Point<double>(event->scroll.dx, event->scroll.dy);
