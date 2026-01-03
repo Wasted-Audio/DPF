@@ -112,8 +112,8 @@ public:
 
    #if DGL_ALLOW_DEPRECATED_METHODS
    /** DEPRECATED DO NOT USE.
-    * The old deprecated constructor allowed for an optional `bool automaticallyScaleAndSetAsMinimumSize`.
-    * This turned out to be not be a good idea; now the scaling is done automatically while minimum size is not.
+    * The old deprecated function allowed for optional `bool automaticallyScale` and `bool resizeNowIfAutoScaling`.
+    * This turned out to be not be a good idea; now the scaling on constraints is never done automatically.
     */
     DISTRHO_DEPRECATED_BY("setGeometryConstraints(uint, uint, bool)")
     void setGeometryConstraints(uint minimumWidth,
