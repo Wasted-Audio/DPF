@@ -996,6 +996,13 @@ puglViewStringChanged(PuglView*, const PuglStringHint key, const char* const val
   return PUGL_SUCCESS;
 }
 
+
+PuglStatus
+puglSetWindowPosition(PuglView* const view, const int x, const int y)
+{
+  return PUGL_SUCCESS;
+}
+
 PuglStatus
 puglSetWindowSize(PuglView* const view, const unsigned width, const unsigned height)
 {
