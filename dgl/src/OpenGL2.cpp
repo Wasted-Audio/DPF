@@ -533,8 +533,6 @@ void Window::PrivateData::startContext()
 {
     const PuglArea size = puglGetSizeHint(view, PUGL_CURRENT_SIZE);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glViewport(0, 0, static_cast<GLsizei>(size.width), static_cast<GLsizei>(size.height));
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -547,6 +545,10 @@ void Window::PrivateData::startContext()
     glViewport(0, 0, static_cast<GLsizei>(size.width), static_cast<GLsizei>(size.height));
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Window::PrivateData::endContext()
