@@ -396,8 +396,6 @@ function(dpf_add_executable NAME)
     if(LINUX AND _dpf_plugin_USE_WEB_VIEW)
       target_link_libraries("${NAME}" PRIVATE "rt")
     endif()
-    # add the files containing C++17 or Objective-C classes
-    dpf__add_plugin_specific_ui_sources("${NAME}" "${_dpf_plugin_USE_WEB_VIEW}")
   endif()
 endfunction()
 
