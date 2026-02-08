@@ -452,6 +452,7 @@ WebViewHandle webViewCreate(const char* const url,
 
     WKWebViewConfiguration* const config = [[WKWebViewConfiguration alloc] init];
     config.limitsNavigationsToAppBoundDomains = false;
+    config.mediaTypesRequiringUserActionForPlayback = WKAudiovisualMediaTypeNone;
     config.preferences = prefs;
 
     const CGRect rect = CGRectMake(options.offset.x / scaleFactor,
