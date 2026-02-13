@@ -919,6 +919,8 @@ function(dpf__add_dgl_cairo NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-cairo PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -994,6 +996,8 @@ function(dpf__add_dgl_external USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-external PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -1081,6 +1085,8 @@ function(dpf__add_dgl_gles2 NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-gles2 PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -1180,6 +1186,8 @@ function(dpf__add_dgl_gles3 NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-gles3 PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -1279,6 +1287,8 @@ function(dpf__add_dgl_opengl NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-opengl PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -1375,6 +1385,8 @@ function(dpf__add_dgl_opengl3 NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-opengl3 PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -1461,6 +1473,8 @@ function(dpf__add_dgl_vulkan NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-vulkan PRIVATE "dl" "rt")
     endif()
   endif()
 
