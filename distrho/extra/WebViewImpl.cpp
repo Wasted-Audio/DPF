@@ -1767,7 +1767,7 @@ static bool qtwebengine(const int qtVersion,
 
     QWebEngineSettings_setAttribute(settings, 3 /* QWebEngineSettings::JavascriptCanAccessClipboard */, true);
     QWebEngineSettings_setAttribute(settings, 6 /* QWebEngineSettings::LocalContentCanAccessRemoteUrls */, true);
-    QWebEngineSettings_setAttribute(settings, 9 /* QWebEngineSettings::LocalContentCanAccessFileUrls */, true);
+    QWebEngineSettings_setAttribute(settings, 26 /* QWebEngineSettings::PlaybackRequiresUserGesture */, true);
     QWebEngineSettings_setAttribute(settings, 28 /* QWebEngineSettings::JavascriptCanPaste */, true);
 
     QWebEngineView webview;
