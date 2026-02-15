@@ -232,6 +232,7 @@
 // -----------------------------------------------------------------------------------------------------------
 
 #ifdef WEB_VIEW_DGL_NAMESPACE
+#include "String.hpp"
 START_NAMESPACE_DGL
 using DISTRHO_NAMESPACE::String;
 #else
