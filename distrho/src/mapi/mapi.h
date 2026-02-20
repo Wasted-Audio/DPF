@@ -47,7 +47,7 @@ void mapi_process(mapi_handle_t handle,
 /**
    Get an effect parameter.
    @param handle A previously created effect.
-   @param index A known index for this effect.
+   @param symbol A known parameter symbol for this effect, must not be NULL or empty.
    @return value A full-ranged value.
 */
 MAPI_EXPORT
@@ -56,7 +56,7 @@ float mapi_get_parameter(mapi_handle_t handle, const char* symbol);
 /**
    Set an effect parameter.
    @param handle A previously created effect.
-   @param index A known index for this effect.
+   @param symbol A known parameter symbol for this effect, must not be NULL or empty.
    @param value A full-ranged value.
 */
 MAPI_EXPORT

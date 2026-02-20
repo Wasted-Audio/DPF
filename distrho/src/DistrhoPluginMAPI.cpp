@@ -47,7 +47,11 @@ public:
         : fPlugin(nullptr, nullptr, nullptr, nullptr)
     {
         for (uint32_t i = 0, count = fPlugin.getParameterCount(); i < count; ++i)
-            fParamMap[fPlugin.getParameterSymbol(i).buffer()] = i;
+        {
+            const char* const symbol = fPlugin.getParameterSymbol(i).buffer();
+            fParamMap[symbol] = i;
+            d_debug("Symbol map %s -> %u", symbol, i);
+        }
 
         fPlugin.activate();
     }
@@ -73,7 +77,7 @@ public:
     float getParameter(const char* const symbol) const
     {
         const std::unordered_map<std::string, uint>::const_iterator it = fParamMap.find(symbol);
-        DISTRHO_SAFE_ASSERT_RETURN(it != fParamMap.end(), 0.f);
+        DISTRHO_CUSTOM_SAFE_ASSERT_RETURN("getParameter called with unknown symbol", it != fParamMap.end(), 0.f);
 
         return fPlugin.getParameterValue(it->second);
     }
@@ -81,7 +85,7 @@ public:
     void setParameter(const char* const symbol, float value)
     {
         const std::unordered_map<std::string, uint>::const_iterator it = fParamMap.find(symbol);
-        DISTRHO_SAFE_ASSERT_RETURN(it != fParamMap.end(),);
+        DISTRHO_CUSTOM_SAFE_ASSERT_RETURN("setParameter called with unknown symbol", it != fParamMap.end(),);
 
         const uint32_t index = it->second;
         fPlugin.setParameterValue(index, fPlugin.getParameterRanges(index).getFixedValue(value));
