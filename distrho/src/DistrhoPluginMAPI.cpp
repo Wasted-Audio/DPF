@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2025 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2026 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -31,6 +31,9 @@
 # endif
 #endif
 
+#include <string>
+#include <unordered_map>
+
 #include "mapi/mapi.h"
 
 START_NAMESPACE_DISTRHO
@@ -43,6 +46,9 @@ public:
     PluginMAPI()
         : fPlugin(nullptr, nullptr, nullptr, nullptr)
     {
+        for (uint32_t i = 0, count = fPlugin.getParameterCount(); i < count; ++i)
+            fParamMap[fPlugin.getParameterSymbol(i).buffer()] = i;
+
         fPlugin.activate();
     }
 
@@ -53,7 +59,7 @@ public:
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    void process(const float* const* ins, float** outs, unsigned int frames)
+    void process(const float* const* const ins, float** const outs, const uint frames)
     {
        #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
         fPlugin.run(const_cast<const float**>(ins), outs, frames, nullptr, 0);
@@ -64,20 +70,27 @@ public:
         updateParameterOutputsAndTriggers();
     }
 
-    float getParameter(unsigned int index) const
+    float getParameter(const char* const symbol) const
     {
-        return fPlugin.getParameterValue(index);
+        const std::unordered_map<std::string, uint>::const_iterator it = fParamMap.find(symbol);
+        DISTRHO_SAFE_ASSERT_RETURN(it != fParamMap.end(), 0.f);
+
+        return fPlugin.getParameterValue(it->second);
     }
 
-    void setParameter(unsigned int index, float value)
+    void setParameter(const char* const symbol, float value)
     {
+        const std::unordered_map<std::string, uint>::const_iterator it = fParamMap.find(symbol);
+        DISTRHO_SAFE_ASSERT_RETURN(it != fParamMap.end(),);
+
+        const uint32_t index = it->second;
         fPlugin.setParameterValue(index, fPlugin.getParameterRanges(index).getFixedValue(value));
     }
 
-    void setState(const char* key, const char* value)
+    void setState(const char* const key, const void* const value)
     {
        #if DISTRHO_PLUGIN_WANT_STATE
-        fPlugin.setState(key, value);
+        fPlugin.setState(key, static_cast<const char*>(value));
        #else
         // unused
         (void)key;
@@ -89,6 +102,7 @@ public:
 
 private:
     PluginExporter fPlugin;
+    std::unordered_map<std::string, uint> fParamMap;
 
     void updateParameterOutputsAndTriggers()
     {
@@ -113,53 +127,43 @@ private:
 // --------------------------------------------------------------------------------------------------------------------
 
 MAPI_EXPORT
-mapi_handle_t mapi_create(unsigned int sample_rate)
+mapi_handle_t mapi_create(const uint sample_rate, const uint buffer_size)
 {
-    if (d_nextBufferSize == 0)
-    {
-       #if defined(_DARKGLASS_DEVICE_PABLITO)
-        d_nextBufferSize = 16;
-       #elif defined(__MOD_DEVICES__)
-        d_nextBufferSize = 128;
-       #else
-        d_nextBufferSize = 2048;
-       #endif
-    }
-
+    d_nextBufferSize = buffer_size;
     d_nextSampleRate = sample_rate;
 
     return new PluginMAPI();
 }
 
 MAPI_EXPORT
-void mapi_process(mapi_handle_t handle,
-                  const float* const* ins,
-                  float** outs,
-                  unsigned int frames)
+void mapi_process(const mapi_handle_t handle,
+                  const float* const* const ins,
+                  float** const outs,
+                  const uint frames)
 {
     static_cast<PluginMAPI*>(handle)->process(ins, outs, frames);
 }
 
 MAPI_EXPORT
-float mapi_get_parameter(mapi_handle_t handle, unsigned int index)
+float mapi_get_parameter(const mapi_handle_t handle, const char* const symbol)
 {
-    return static_cast<PluginMAPI*>(handle)->getParameter(index);
+    return static_cast<PluginMAPI*>(handle)->getParameter(symbol);
 }
 
 MAPI_EXPORT
-void mapi_set_parameter(mapi_handle_t handle, unsigned int index, float value)
+void mapi_set_parameter(const mapi_handle_t handle, const char* const symbol, float value)
 {
-    static_cast<PluginMAPI*>(handle)->setParameter(index, value);
+    static_cast<PluginMAPI*>(handle)->setParameter(symbol, value);
 }
 
 MAPI_EXPORT
-void mapi_set_state(mapi_handle_t handle, const char* key, const char* value)
+void mapi_set_state(const mapi_handle_t handle, const char* const key, const void* const value)
 {
     static_cast<PluginMAPI*>(handle)->setState(key, value);
 }
 
 MAPI_EXPORT
-void mapi_destroy(mapi_handle_t handle)
+void mapi_destroy(const mapi_handle_t handle)
 {
     delete static_cast<PluginMAPI*>(handle);
 }
