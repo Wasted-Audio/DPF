@@ -962,6 +962,7 @@ protected:
       @see onDisplay
     */
     virtual void onNanoDisplay() = 0;
+    virtual void onNanoDisplayAfter() {}
 
 private:
    /**

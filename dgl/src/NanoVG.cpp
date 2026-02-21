@@ -1135,14 +1135,16 @@ inline void NanoBaseWidget<SubWidget>::onDisplay()
         NanoVG::save();
         translate(SubWidget::getAbsoluteX(), SubWidget::getAbsoluteY());
         onNanoDisplay();
-        NanoVG::restore();
         displayChildren();
+        onNanoDisplayAfter();
+        NanoVG::restore();
     }
     else
     {
         NanoVG::beginFrame(SubWidget::getWidth(), SubWidget::getHeight());
         onNanoDisplay();
         displayChildren();
+        onNanoDisplayAfter();
         NanoVG::endFrame();
     }
 }
