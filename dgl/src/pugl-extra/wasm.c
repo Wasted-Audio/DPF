@@ -977,7 +977,7 @@ puglObscureRegion(PuglView*      view,
 }
 
 PuglNativeView
-puglGetNativeView(PuglView* const view)
+puglGetNativeView(const PuglView* const view)
 {
   return 0;
 }
@@ -993,6 +993,13 @@ puglViewStringChanged(PuglView*, const PuglStringHint key, const char* const val
     break;
   }
 
+  return PUGL_SUCCESS;
+}
+
+
+PuglStatus
+puglSetWindowPosition(PuglView* const view, const int x, const int y)
+{
   return PUGL_SUCCESS;
 }
 

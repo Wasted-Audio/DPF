@@ -14,51 +14,23 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#pragma once
-
-#define DISTRHO_ASSERT_EQUAL(v1, v2, msg) \
-    if (v1 != v2) { d_stderr2("Test condition failed: %s; file:%s line:%i", msg, __FILE__, __LINE__); return 1; }
-
-#define DISTRHO_ASSERT_NOT_EQUAL(v1, v2, msg) \
-    if (v1 == v2) { d_stderr2("Test condition failed: %s; file:%s line:%i", msg, __FILE__, __LINE__); return 1; }
-
-#define DISTRHO_ASSERT_SAFE_EQUAL(v1, v2, msg) \
-    if (d_isNotEqual(v1, v2)) { d_stderr2("Test condition failed: %s; file:%s line:%i", msg, __FILE__, __LINE__); return 1; }
-
-#ifndef HEADLESS_TESTS
-
-#include "dgl/Application.hpp"
-#include "distrho/extra/Thread.hpp"
-
-START_NAMESPACE_DGL
+#define HEADLESS_TESTS
+#include "tests.hpp"
+#include "distrho/extra/Base64.hpp"
+#include "distrho/extra/String.hpp"
 
 // --------------------------------------------------------------------------------------------------------------------
 
-class ApplicationQuitter : public Thread
+int main()
 {
-    Application& app;
-    const int numSecondsToWait;
+    using namespace DISTRHO_NAMESPACE;
 
-public:
-    ApplicationQuitter(Application& a, const int s = 2)
-        : Thread("ApplicationQuitter"),
-          app(a),
-          numSecondsToWait(s)
-    {
-        startThread();
-    }
+    String test("This is a test");
+    std::vector<uint8_t> testblob(test.buffer(), test.buffer() + (test.length() + 1));
+    std::vector<uint8_t> blob = d_getChunkFromBase64String(String::asBase64(test.buffer(), test.length() + 1));
+    DISTRHO_ASSERT_EQUAL(blob, testblob, "encode + decode must match original data");
 
-private:
-    void run() override
-    {
-        d_sleep(numSecondsToWait);
-        d_stdout("About to quit now...");
-        app.quit();
-    }
-};
+    return 0;
+}
 
 // --------------------------------------------------------------------------------------------------------------------
-
-END_NAMESPACE_DGL
-
-#endif

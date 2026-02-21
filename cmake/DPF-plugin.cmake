@@ -129,43 +129,43 @@ function(dpf_add_plugin NAME)
   set(_dgl_library)
   if(_dpf_plugin_FILES_UI)
     if(_dpf_plugin_UI_TYPE STREQUAL "cairo")
-      dpf__add_dgl_cairo($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                         $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                         $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+      dpf__add_dgl_cairo(${_dpf_plugin_NO_SHARED_RESOURCES}
+                         ${_dpf_plugin_USE_FILE_BROWSER}
+                         ${_dpf_plugin_USE_WEB_VIEW})
       set(_dgl_library dgl-cairo)
     elseif(_dpf_plugin_UI_TYPE STREQUAL "external")
-      dpf__add_dgl_external($<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                            $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+      dpf__add_dgl_external(${_dpf_plugin_USE_FILE_BROWSER}
+                            ${_dpf_plugin_USE_WEB_VIEW})
       set(_dgl_library dgl-external)
     elseif(_dpf_plugin_UI_TYPE STREQUAL "gles2")
-      dpf__add_dgl_gles2($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                         $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                         $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+      dpf__add_dgl_gles2(${_dpf_plugin_NO_SHARED_RESOURCES}
+                         ${_dpf_plugin_USE_FILE_BROWSER}
+                         ${_dpf_plugin_USE_WEB_VIEW})
       set(_dgl_library dgl-gles2)
     elseif(_dpf_plugin_UI_TYPE STREQUAL "gles3")
-      dpf__add_dgl_gles3($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                         $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                         $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+      dpf__add_dgl_gles3(${_dpf_plugin_NO_SHARED_RESOURCES}
+                         ${_dpf_plugin_USE_FILE_BROWSER}
+                         ${_dpf_plugin_USE_WEB_VIEW})
       set(_dgl_library dgl-gles3)
     elseif(_dpf_plugin_UI_TYPE STREQUAL "opengl")
-      dpf__add_dgl_opengl($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                          $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                          $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+      dpf__add_dgl_opengl(${_dpf_plugin_NO_SHARED_RESOURCES}
+                          ${_dpf_plugin_USE_FILE_BROWSER}
+                          ${_dpf_plugin_USE_WEB_VIEW})
       set(_dgl_library dgl-opengl)
     elseif(_dpf_plugin_UI_TYPE STREQUAL "opengl3")
-      dpf__add_dgl_opengl3($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                           $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                           $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+      dpf__add_dgl_opengl3(${_dpf_plugin_NO_SHARED_RESOURCES}
+                           ${_dpf_plugin_USE_FILE_BROWSER}
+                           ${_dpf_plugin_USE_WEB_VIEW})
       set(_dgl_library dgl-opengl3)
     elseif(_dpf_plugin_UI_TYPE STREQUAL "vulkan")
-      dpf__add_dgl_vulkan($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                          $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                          $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+      dpf__add_dgl_vulkan(${_dpf_plugin_NO_SHARED_RESOURCES}
+                          ${_dpf_plugin_USE_FILE_BROWSER}
+                          ${_dpf_plugin_USE_WEB_VIEW})
       set(_dgl_library dgl-vulkan)
     elseif(_dpf_plugin_UI_TYPE STREQUAL "webview")
       set(_dpf_plugin_USE_WEB_VIEW TRUE)
-      dpf__add_dgl_external($<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                            $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+      dpf__add_dgl_external(${_dpf_plugin_USE_FILE_BROWSER}
+                            ${_dpf_plugin_USE_WEB_VIEW})
       set(_dgl_library dgl-external)
     else()
       message(FATAL_ERROR "Unrecognized UI type for plugin: ${_dpf_plugin_UI_TYPE}")
@@ -308,43 +308,43 @@ function(dpf_add_executable NAME)
 
   set(_dgl_library)
   if(_dpf_plugin_UI_TYPE STREQUAL "cairo")
-    dpf__add_dgl_cairo($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                       $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                       $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+    dpf__add_dgl_cairo(${_dpf_plugin_NO_SHARED_RESOURCES}
+                       ${_dpf_plugin_USE_FILE_BROWSER}
+                       ${_dpf_plugin_USE_WEB_VIEW})
     set(_dgl_library dgl-cairo)
   elseif(_dpf_plugin_UI_TYPE STREQUAL "external")
-    dpf__add_dgl_external($<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                          $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+    dpf__add_dgl_external(${_dpf_plugin_USE_FILE_BROWSER}
+                          ${_dpf_plugin_USE_WEB_VIEW})
     set(_dgl_library dgl-external)
   elseif(_dpf_plugin_UI_TYPE STREQUAL "gles2")
-    dpf__add_dgl_gles2($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                       $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                       $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+    dpf__add_dgl_gles2(${_dpf_plugin_NO_SHARED_RESOURCES}
+                       ${_dpf_plugin_USE_FILE_BROWSER}
+                       ${_dpf_plugin_USE_WEB_VIEW})
     set(_dgl_library dgl-gles2)
   elseif(_dpf_plugin_UI_TYPE STREQUAL "gles3")
-    dpf__add_dgl_gles3($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                       $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                       $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+    dpf__add_dgl_gles3(${_dpf_plugin_NO_SHARED_RESOURCES}
+                       ${_dpf_plugin_USE_FILE_BROWSER}
+                       ${_dpf_plugin_USE_WEB_VIEW})
     set(_dgl_library dgl-gles3)
   elseif(_dpf_plugin_UI_TYPE STREQUAL "opengl")
-    dpf__add_dgl_opengl($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                        $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                        $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+    dpf__add_dgl_opengl(${_dpf_plugin_NO_SHARED_RESOURCES}
+                        ${_dpf_plugin_USE_FILE_BROWSER}
+                        ${_dpf_plugin_USE_WEB_VIEW})
     set(_dgl_library dgl-opengl)
   elseif(_dpf_plugin_UI_TYPE STREQUAL "opengl3")
-    dpf__add_dgl_opengl3($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                         $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                         $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+    dpf__add_dgl_opengl3(${_dpf_plugin_NO_SHARED_RESOURCES}
+                         ${_dpf_plugin_USE_FILE_BROWSER}
+                         ${_dpf_plugin_USE_WEB_VIEW})
     set(_dgl_library dgl-opengl3)
   elseif(_dpf_plugin_UI_TYPE STREQUAL "vulkan")
-    dpf__add_dgl_vulkan($<NOT:$<BOOL:${_dpf_plugin_NO_SHARED_RESOURCES}>>
-                        $<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                        $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+    dpf__add_dgl_vulkan(${_dpf_plugin_NO_SHARED_RESOURCES}
+                        ${_dpf_plugin_USE_FILE_BROWSER}
+                        ${_dpf_plugin_USE_WEB_VIEW})
     set(_dgl_library dgl-vulkan)
   elseif(_dpf_plugin_UI_TYPE STREQUAL "webview")
     set(_dpf_plugin_USE_WEB_VIEW TRUE)
-    dpf__add_dgl_external($<BOOL:${_dpf_plugin_USE_FILE_BROWSER}>
-                          $<BOOL:${_dpf_plugin_USE_WEB_VIEW}>)
+    dpf__add_dgl_external(${_dpf_plugin_USE_FILE_BROWSER}
+                          ${_dpf_plugin_USE_WEB_VIEW})
     set(_dgl_library dgl-external)
   else()
     message(FATAL_ERROR "Unrecognized UI type for executable: ${_dpf_plugin_UI_TYPE}")
@@ -396,8 +396,6 @@ function(dpf_add_executable NAME)
     if(LINUX AND _dpf_plugin_USE_WEB_VIEW)
       target_link_libraries("${NAME}" PRIVATE "rt")
     endif()
-    # add the files containing C++17 or Objective-C classes
-    dpf__add_plugin_specific_ui_sources("${NAME}" "${_dpf_plugin_USE_WEB_VIEW}")
   endif()
 endfunction()
 
@@ -860,7 +858,7 @@ endfunction()
 #
 # Add the Cairo variant of DGL, if not already available.
 #
-function(dpf__add_dgl_cairo SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
+function(dpf__add_dgl_cairo NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
   if(TARGET dgl-cairo)
     return()
   endif()
@@ -888,10 +886,10 @@ function(dpf__add_dgl_cairo SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
     "${DPF_ROOT_DIR}/dgl/src/Window.cpp"
     "${DPF_ROOT_DIR}/dgl/src/WindowPrivateData.cpp"
     "${DPF_ROOT_DIR}/dgl/src/Cairo.cpp")
-  if(SHARED_RESOURCES)
-    target_sources(dgl-cairo PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
-  else()
+  if(NO_SHARED_RESOURCES)
     target_compile_definitions(dgl-cairo PUBLIC "DGL_NO_SHARED_RESOURCES")
+  else()
+    target_sources(dgl-cairo PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
   endif()
   if(APPLE)
     target_sources(dgl-cairo PRIVATE
@@ -921,6 +919,8 @@ function(dpf__add_dgl_cairo SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-cairo PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -996,6 +996,8 @@ function(dpf__add_dgl_external USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-external PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -1015,7 +1017,7 @@ endfunction()
 #
 # Add the GLESv2 variant of DGL, if not already available.
 #
-function(dpf__add_dgl_gles2 SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
+function(dpf__add_dgl_gles2 NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
   if(TARGET dgl-gles2)
     return()
   endif()
@@ -1046,10 +1048,10 @@ function(dpf__add_dgl_gles2 SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
     "${DPF_ROOT_DIR}/dgl/src/OpenGL.cpp"
     "${DPF_ROOT_DIR}/dgl/src/OpenGL3.cpp"
     "${DPF_ROOT_DIR}/dgl/src/NanoVG.cpp")
-  if(SHARED_RESOURCES)
-    target_sources(dgl-gles2 PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
-  else()
+  if(NO_SHARED_RESOURCES)
     target_compile_definitions(dgl-gles2 PUBLIC "DGL_NO_SHARED_RESOURCES")
+  else()
+    target_sources(dgl-gles2 PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
   endif()
   if(APPLE)
     target_sources(dgl-gles2 PRIVATE
@@ -1083,6 +1085,8 @@ function(dpf__add_dgl_gles2 SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-gles2 PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -1114,7 +1118,7 @@ endfunction()
 #
 # Add the GLESv3 variant of DGL, if not already available.
 #
-function(dpf__add_dgl_gles3 SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
+function(dpf__add_dgl_gles3 NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
   if(TARGET dgl-gles3)
     return()
   endif()
@@ -1145,10 +1149,10 @@ function(dpf__add_dgl_gles3 SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
     "${DPF_ROOT_DIR}/dgl/src/OpenGL.cpp"
     "${DPF_ROOT_DIR}/dgl/src/OpenGL3.cpp"
     "${DPF_ROOT_DIR}/dgl/src/NanoVG.cpp")
-  if(SHARED_RESOURCES)
-    target_sources(dgl-gles3 PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
-  else()
+  if(NO_SHARED_RESOURCES)
     target_compile_definitions(dgl-gles3 PUBLIC "DGL_NO_SHARED_RESOURCES")
+  else()
+    target_sources(dgl-gles3 PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
   endif()
   if(APPLE)
     target_sources(dgl-gles3 PRIVATE
@@ -1182,6 +1186,8 @@ function(dpf__add_dgl_gles3 SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-gles3 PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -1213,7 +1219,7 @@ endfunction()
 #
 # Add the OpenGL variant of DGL, if not already available.
 #
-function(dpf__add_dgl_opengl SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
+function(dpf__add_dgl_opengl NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
   if(TARGET dgl-opengl)
     return()
   endif()
@@ -1244,10 +1250,10 @@ function(dpf__add_dgl_opengl SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
     "${DPF_ROOT_DIR}/dgl/src/OpenGL.cpp"
     "${DPF_ROOT_DIR}/dgl/src/OpenGL2.cpp"
     "${DPF_ROOT_DIR}/dgl/src/NanoVG.cpp")
-  if(SHARED_RESOURCES)
-    target_sources(dgl-opengl PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
-  else()
+  if(NO_SHARED_RESOURCES)
     target_compile_definitions(dgl-opengl PUBLIC "DGL_NO_SHARED_RESOURCES")
+  else()
+    target_sources(dgl-opengl PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
   endif()
   if(APPLE)
     target_sources(dgl-opengl PRIVATE
@@ -1281,6 +1287,8 @@ function(dpf__add_dgl_opengl SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-opengl PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -1309,7 +1317,7 @@ endfunction()
 #
 # Add the OpenGL3 variant of DGL, if not already available.
 #
-function(dpf__add_dgl_opengl3 SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
+function(dpf__add_dgl_opengl3 NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
   if(TARGET dgl-opengl3)
     return()
   endif()
@@ -1340,10 +1348,10 @@ function(dpf__add_dgl_opengl3 SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
     "${DPF_ROOT_DIR}/dgl/src/OpenGL.cpp"
     "${DPF_ROOT_DIR}/dgl/src/OpenGL3.cpp"
     "${DPF_ROOT_DIR}/dgl/src/NanoVG.cpp")
-  if(SHARED_RESOURCES)
-    target_sources(dgl-opengl3 PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
-  else()
+  if(NO_SHARED_RESOURCES)
     target_compile_definitions(dgl-opengl3 PUBLIC "DGL_NO_SHARED_RESOURCES")
+  else()
+    target_sources(dgl-opengl3 PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
   endif()
   if(APPLE)
     target_sources(dgl-opengl3 PRIVATE
@@ -1377,6 +1385,8 @@ function(dpf__add_dgl_opengl3 SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-opengl3 PRIVATE "dl" "rt")
     endif()
   endif()
 
@@ -1401,7 +1411,7 @@ endfunction()
 #
 # Add the Vulkan variant of DGL, if not already available.
 #
-function(dpf__add_dgl_vulkan SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
+function(dpf__add_dgl_vulkan NO_SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
   if(TARGET dgl-vulkan)
     return()
   endif()
@@ -1427,9 +1437,9 @@ function(dpf__add_dgl_vulkan SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
     "${DPF_ROOT_DIR}/dgl/src/WindowPrivateData.cpp"
     "${DPF_ROOT_DIR}/dgl/src/Vulkan.cpp")
   if(NO_SHARED_RESOURCES)
-    target_sources(dgl-vulkan PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
-  else()
     target_compile_definitions(dgl-vulkan PUBLIC "DGL_NO_SHARED_RESOURCES")
+  else()
+    target_sources(dgl-vulkan PRIVATE "${DPF_ROOT_DIR}/dgl/src/Resources.cpp")
   endif()
   if(APPLE)
     target_sources(dgl-vulkan PRIVATE
@@ -1463,6 +1473,8 @@ function(dpf__add_dgl_vulkan SHARED_RESOURCES USE_FILE_BROWSER USE_WEB_VIEW)
         PROPERTIES
           COMPILE_FLAGS
             $<IF:$<BOOL:${MSVC}>,/std:c++17,-std=gnu++17>)
+    elseif(NOT HAIKU)
+      target_link_libraries(dgl-vulkan PRIVATE "dl" "rt")
     endif()
   endif()
 

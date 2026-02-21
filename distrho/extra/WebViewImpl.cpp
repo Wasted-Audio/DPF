@@ -232,6 +232,7 @@
 // -----------------------------------------------------------------------------------------------------------
 
 #ifdef WEB_VIEW_DGL_NAMESPACE
+#include "String.hpp"
 START_NAMESPACE_DGL
 using DISTRHO_NAMESPACE::String;
 #else
@@ -411,30 +412,30 @@ WebViewHandle webViewCreate(const char* const url,
                             const WebViewOptions& options)
 {
 #if WEB_VIEW_USING_CHOC
-    WebView* const webview = webview_choc_create(options);
+    WebView* const webview = webview_choc_create(url, options);
     if (webview == nullptr)
         return nullptr;
 
     const HWND hwnd = static_cast<HWND>(webview_choc_handle(webview));
+    ShowWindow(hwnd, SW_HIDE);
 
     LONG_PTR flags = GetWindowLongPtr(hwnd, -16);
     flags = (flags & ~WS_POPUP) | WS_CHILD;
     SetWindowLongPtr(hwnd, -16, flags);
 
     SetParent(hwnd, reinterpret_cast<HWND>(windowId));
-    SetWindowPos(hwnd, nullptr,
+    SetWindowPos(hwnd,
+                 nullptr,
                  options.offset.x,
                  options.offset.y,
-                 initialWidth - options.offset.x,
-                 initialHeight - options.offset.y,
+                 initialWidth + options.offset.x,
+                 initialHeight + options.offset.y,
                  SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     ShowWindow(hwnd, SW_SHOW);
 
     WebViewData* const whandle = new WebViewData;
     whandle->webview = webview;
     whandle->url = url;
-
-    webview_choc_navigate(webview, url);
 
     return whandle;
 #elif WEB_VIEW_USING_MACOS_WEBKIT
@@ -452,6 +453,7 @@ WebViewHandle webViewCreate(const char* const url,
 
     WKWebViewConfiguration* const config = [[WKWebViewConfiguration alloc] init];
     config.limitsNavigationsToAppBoundDomains = false;
+    config.mediaTypesRequiringUserActionForPlayback = WKAudiovisualMediaTypeNone;
     config.preferences = prefs;
 
     const CGRect rect = CGRectMake(options.offset.x / scaleFactor,
@@ -834,7 +836,7 @@ void webViewResize(const WebViewHandle handle, const uint width, const uint heig
 {
    #if WEB_VIEW_USING_CHOC
     const HWND hwnd = static_cast<HWND>(webview_choc_handle(handle->webview));
-    SetWindowPos(hwnd, nullptr, 0, 0, width, height, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER);
+    SetWindowPos(hwnd, nullptr, 0, 0, width, height, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
    #elif WEB_VIEW_USING_MACOS_WEBKIT
     [handle->webview setFrameSize:NSMakeSize(width / scaleFactor, height / scaleFactor)];
    #elif WEB_VIEW_USING_X11_IPC
@@ -1112,6 +1114,33 @@ static bool gtk3(Display* const display,
     webkit_web_view_run_javascript_t webkit_web_view_run_javascript = reinterpret_cast<webkit_web_view_run_javascript_t>(dlsym(nullptr, "webkit_web_view_run_javascript"));
     DISTRHO_SAFE_ASSERT_RETURN(webkit_web_view_evaluate_javascript != nullptr || webkit_web_view_run_javascript != nullptr, false);
 
+    // get desktop scale factor, gtk dpi scaling needs to be based on this one
+    XrmInitialize();
+
+    double desktopScaleFactor = 1.0;
+    if (char* const rms = XResourceManagerString(display))
+    {
+        if (const XrmDatabase db = XrmGetStringDatabase(rms))
+        {
+            char* type = nullptr;
+            XrmValue value = {};
+
+            if (XrmGetResource(db, "Xft.dpi", "Xft.Dpi", &type, &value)
+                && type != nullptr
+                && std::strcmp(type, "String") == 0
+                && value.addr != nullptr)
+            {
+                char*        end    = nullptr;
+                const double xftDpi = std::strtod(value.addr, &end);
+                if (xftDpi > 0.0 && xftDpi < HUGE_VAL)
+                    desktopScaleFactor = xftDpi / 96.0;
+            }
+
+            XrmDestroyDatabase(db);
+        }
+    }
+
+    // gtk3 does not support fractional scaling, so we round to next integer if fmod >= 0.75
     const int gdkScale = std::fmod(scaleFactor, 1.0) >= 0.75
                        ? static_cast<int>(scaleFactor + 0.5)
                        : static_cast<int>(scaleFactor);
@@ -1122,13 +1151,23 @@ static bool gtk3(Display* const display,
         std::snprintf(scale, 7, "%d", gdkScale);
         setenv("GDK_SCALE", scale, 1);
 
-        std::snprintf(scale, 7, "%.2f", (1.0 / scaleFactor) * 1.2);
-        setenv("GDK_DPI_SCALE", scale, 1);
+        if (gdkScale > scaleFactor)
+        {
+            std::snprintf(scale, 7, "%.2f", 0.5 + ((0.25 - gdkScale + scaleFactor) / 0.25 * 0.0835));
+            setenv("GDK_DPI_SCALE", scale, 1);
+        }
+        else
+        {
+            std::snprintf(scale, 7, "%.2f", 1.0 / scaleFactor);
+            setenv("GDK_DPI_SCALE", scale, 1);
+        }
     }
-    else if (scaleFactor > 1.0)
+    else
     {
+        setenv("GDK_SCALE", "1", 1);
+
         char scale[8] = {};
-        std::snprintf(scale, 7, "%.2f", (1.0 / scaleFactor) * 1.4);
+        std::snprintf(scale, 7, "%.2f", (1.0 / desktopScaleFactor) * scaleFactor);
         setenv("GDK_DPI_SCALE", scale, 1);
     }
 
@@ -1145,8 +1184,8 @@ static bool gtk3(Display* const display,
     GtkWidget* const window = gtk_plug_new(winId);
     DISTRHO_SAFE_ASSERT_RETURN(window != nullptr, false);
 
-    gtk_window_set_default_size(GTK_WINDOW(window), width, height);
-    gtk_window_move(GTK_WINDOW(window), x, y);
+    gtk_window_set_default_size(GTK_WINDOW(window), width / gdkScale, height / gdkScale);
+    gtk_window_move(GTK_WINDOW(window), x / gdkScale, y / gdkScale);
 
     WebKitSettings* const settings = webkit_settings_new();
     DISTRHO_SAFE_ASSERT_RETURN(settings != nullptr, false);
@@ -1766,7 +1805,7 @@ static bool qtwebengine(const int qtVersion,
 
     QWebEngineSettings_setAttribute(settings, 3 /* QWebEngineSettings::JavascriptCanAccessClipboard */, true);
     QWebEngineSettings_setAttribute(settings, 6 /* QWebEngineSettings::LocalContentCanAccessRemoteUrls */, true);
-    QWebEngineSettings_setAttribute(settings, 9 /* QWebEngineSettings::LocalContentCanAccessFileUrls */, true);
+    QWebEngineSettings_setAttribute(settings, 26 /* QWebEngineSettings::PlaybackRequiresUserGesture */, true);
     QWebEngineSettings_setAttribute(settings, 28 /* QWebEngineSettings::JavascriptCanPaste */, true);
 
     QWebEngineView webview;

@@ -13,7 +13,6 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-13
           - macos-14
           - macos-15
           # webgui failure
@@ -81,6 +80,13 @@ jobs:
       env:
         CFLAGS: -Werror
         CXXFLAGS: -Werror -std=gnu++20
+      run: |
+        make clean >/dev/null
+        make -j ${{ env.JOBS }}
+    - name: No deprecated methods allowed
+      env:
+        CFLAGS: -Werror
+        CXXFLAGS: -Werror -DDGL_ALLOW_DEPRECATED_METHODS=0
       run: |
         make clean >/dev/null
         make -j ${{ env.JOBS }}
